@@ -1,52 +1,53 @@
-const mysql = require('mysql2');
-require('dotenv').config()
-console.log(process.env.password)
+
+var mysql = require('mysql2')
 
 const pool = mysql.createPool({
 
-  host : process.env.HOST,
- user: process.env.USER,
-  password: process.env.PASSWORD,
-    database: process.env.DATABASE,
-    port: process.env.PORT,
+  host : 'db-mysql-blr1-78922-do-user-4199968-0.c.db.ondigitalocean.com',
+   user: 'doadmin',
+  password:'AVNS_GQrps4okJNd-Q3VSn68',
+    database: 'trading_app_management',
+    port:'25060' ,
     multipleStatements: true,
-	waitForConnections: true,
-  connectionLimit: 100,
-  maxIdle: 100, // max idle connections, the default value is the same as `connectionLimit`
-  idleTimeout: 60000, // idle connections timeout, in milliseconds, the default value 60000
-  queueLimit: 0,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0
+
+
+  // host : 'localhost',
+  //  user: 'root',
+  // password:'123',
+  //   database: 'fileachiever',
+  //   port:'3306' ,
+  //   multipleStatements: true
+
+  // CREATE USER 'root'@'%' IDENTIFIED BY 'MyComplexPassword123!';
+
   })
 
 
 
-  pool.getConnection((err, connection) => {
-	if (err) {
-	  console.error('Error connecting to the database:', err.message);
-	} else {
-	  console.log('Connected to the database');
-	  connection.release();
-	}
-   });
-   // Handle unexpected errors
-   pool.on('error', (err) => {
-	console.error('Unexpected database error:', err.message);
-	if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-	  console.error('Reconnecting to the database...');
-	  pool.getConnection((reconnectErr, connection) => {
-		if (reconnectErr) {
-		  console.error('Reconnection failed:', reconnectErr.message);
-		} else {
-		  console.log('Reconnected to the database');
-		  connection.release();
-		}
-	  });
-	} else {
-	  throw err;
-	}
-   });
+  // country , story , blog-category , blogs , state , 
 
-   module.exports = pool.promise();
+
+
+  // var mysql = require('mysql')
+  // require('dotenv').config()
+  
+  // const pool = mysql.createPool({
+  //   host:'103.117.180.114',
+  //   ///host : 'localhost',
+  //    user: 'shopsun_shopsun',
+  //   password:'Shopsun@321!',
+  //     database: 'shopsun_shopsun',
+  //     port:'3306' ,
+  //     multipleStatements: true
+  //   })
+  
+  
+  
+  
+  // module.exports = pool;
+
+module.exports = pool;
+
+
 
 

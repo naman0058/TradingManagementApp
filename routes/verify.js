@@ -4,6 +4,11 @@ var jwt = require('jsonwebtoken');
 const secretkey = 'ashdgjgssfdgSFGF'
 
 
+
+
+
+
+
 // function userAuthenticationToken(req,res,next){
 //     // const token = req.headers['authrorization'];
 //     const token = undefined
@@ -33,14 +38,18 @@ function userAuthenticationToken(req, res, next) {
 
 
 function adminAuthenticationToken(req,res,next){
-    const token = req.headers['authrorization'];
-    if(!token) return res.sendStatus(401)
-    jwt.verify(token,secretkey,(err,user)=>{
-      if(err) res.sendStatus(403)
-      req.user = user
-      next();
-    })
+  if(req.session.adminid) {
+    req.categories = true;
+     next();
+  }
+  else {
+    res.render('login',{msg:'Wrong Credentials'})
+    next()
+  }
 }
+
+
+
 
 
   module.exports = {

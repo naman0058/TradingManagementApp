@@ -1,17 +1,20 @@
 var express = require('express');
 var router = express.Router();
 var pool = require('./pool');
-const { Server } = require("socket.io");
 
+const fs = require('fs');
+const xlsx = require('xlsx');
+router.get('/read', (req, res) => {
+const excelFilePath = 'public/read.xlsx';
 
-const io = new Server({ /* options */ });
-
-io.on("connection", (socket) => {
-  // ...
-  console.log('connected')
+   const workbook = xlsx.readFile(excelFilePath);
+   const sheetName = workbook.SheetNames[0]; // Assuming the data is in the first sheet
+   const worksheet = workbook.Sheets[sheetName];
+   const data = xlsx.utils.sheet_to_json(worksheet);
+   res.json(data[1]);
 });
 
-io.listen(4000);
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
