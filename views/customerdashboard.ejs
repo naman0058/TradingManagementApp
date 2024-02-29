@@ -1,0 +1,177 @@
+<%- include ('./header.ejs') %>
+		
+		<!--**********************************
+            Content body start
+        ***********************************-->
+        <div class="content-body">
+            <!-- row -->	
+			<div class="page-titles">
+				<ol class="breadcrumb">
+					<li><h5 class="bc-title">Dashboard</h5></li>
+					<li class="breadcrumb-item"><a href="javascript:void(0)">
+						<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M2.125 6.375L8.5 1.41667L14.875 6.375V14.1667C14.875 14.5424 14.7257 14.9027 14.4601 15.1684C14.1944 15.4341 13.8341 15.5833 13.4583 15.5833H3.54167C3.16594 15.5833 2.80561 15.4341 2.53993 15.1684C2.27426 14.9027 2.125 14.5424 2.125 14.1667V6.375Z" stroke="#2C2C2C" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M6.375 15.5833V8.5H10.625V15.5833" stroke="#2C2C2C" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+						Home </a>
+					</li>
+					<li class="breadcrumb-item active"><a href="javascript:void(0)">Dashboard</a></li>
+				</ol>
+				<a class="text-primary fs-13" data-bs-toggle="offcanvas" href="#offcanvasExample1" role="button" aria-controls="offcanvasExample1">+ Add Task</a>
+			</div>
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-xl-9 wid-100">
+						<div class="row">
+							<div class="col-xl-3 col-sm-6">
+								<div class="card chart-grd same-card">
+									<div class="card-body depostit-card p-0">
+										<div class="depostit-card-media d-flex justify-content-between pb-0">
+											<div>
+												<h6>Weekly Profit</h6>
+												<h3>Rs. <%=result[0][0].weekly_actual_pl.toFixed(2)%></h3>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+							</div>
+
+                            <div class="col-xl-3 col-sm-6">
+								<div class="card chart-grd same-card">
+									<div class="card-body depostit-card p-0">
+										<div class="depostit-card-media d-flex justify-content-between pb-0">
+											<div>
+												<h6>Monthly Profit</h6>
+												<h3>Rs.<%=result[1][0].monthly_actual_pl.toFixed(2)%></h3>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+							</div>
+
+                            <div class="col-xl-3 col-sm-6">
+								<div class="card chart-grd same-card">
+									<div class="card-body depostit-card p-0">
+										<div class="depostit-card-media d-flex justify-content-between pb-0">
+											<div>
+												<h6>Last Month Profit</h6>
+												<h3>Rs.<%=result[2][0].last_month_actual_pl.toFixed(2)%></h3>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+                            <div class="col-xl-3 col-sm-6">
+								<div class="card chart-grd same-card">
+									<div class="card-body depostit-card p-0">
+										<div class="depostit-card-media d-flex justify-content-between pb-0">
+											<div>
+												<h6>Yearly Profit</h6>
+												<h3>Rs.<%=result[3][0].yearly_actual_pl.toFixed(2)%></h3>
+											</div>
+											
+										</div>
+										<div id="NewCustomers"></div>
+
+									</div>
+								</div>
+							</div>
+
+                           
+							<div class="col-xl-12">
+								<div class="card overflow-hidden">
+									<div class="card-header border-0 pb-0 flex-wrap">
+										<h4 class="heading mb-0">Yearly Overview</h4>
+										<input type="hidden" value="<%=unique_id%>" id="unique_id">
+									</div>
+									<div class="card-body  p-0">
+											<div id="overiewChart"></div>
+									
+									</div>
+								</div>
+							</div>
+						
+						</div>
+					</div>
+			
+					
+					
+					
+				
+					<div class="col-xl-9 bst-seller">
+						<div class="card">
+							<div class="card-body p-0">
+								<div class="table-responsive active-projects style-1 ItemsCheckboxSec shorting ">
+								<div class="tbl-caption">
+									<h4 class="heading mb-0">Latests Trade</h4>
+								
+								</div>
+									<table id="empoloyees-tbl" class="table">
+										<thead>
+                                            <tr>
+												<th>
+													<div class="form-check custom-checkbox ms-0">
+														<input type="checkbox" class="form-check-input checkAllInput" id="checkAll2" required="">
+														<label class="form-check-label" for="checkAll2"></label>
+													</div>
+												</th>
+                                                <th>Date</th>
+                                                <th>Actual Profit / Loss</th>
+                                                <th>View Details</th>
+                                              
+                                            </tr>
+                                        </thead>
+										<tbody>
+
+                                            <% for(i=0;i<result[4].length;i++){ %>
+
+											<tr>
+												<td>
+													<div class="form-check custom-checkbox">
+														<input type="checkbox" class="form-check-input" id="customCheckBox0100" required="">
+														<label class="form-check-label" for="customCheckBox0100"></label>
+													</div>
+												</td>
+												<td><span><%=result[4][i].date%></span></td>
+												<td><span>Rs. <%=result[4][i].actual_pl%></span></td>
+												<td>  <a href="/admin/customer/trade/details?date=<%=result[4][i].date%>&unique_id=<%=unique_id%>"
+                                                    target="_blank"><span
+                                                        class="badge badge-success light border-0">View Details</span></a></td>
+
+                                                
+												
+                                              
+												
+											
+											</tr>
+
+                                            <% } %>
+											
+											
+											
+										</tbody>
+										
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			
+			</div>
+        </div>
+		
+        <!--**********************************
+            Content body end
+        ***********************************-->
+		
+	
+	
+		
+        <%- include ('./footer.ejs') %>
+     

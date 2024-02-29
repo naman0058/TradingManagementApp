@@ -135,11 +135,12 @@ const readDetailedExcelData = async () => {
                   // Remove first and last objects of each array
                   const trimmedResultArrays = modifiedResultArrays.map(subArray => {
                       const length = subArray.length;
-                      return subArray.slice(1, length - 1);
+                      return subArray.slice(1, length -2);
                   });
                   resolve(trimmedResultArrays);
               } else {
-                  reject({ msg: 'Customer Not Exists in Our Database', customer_id });
+                
+                  resolve({ msg: 'Customer Not Exists in Our Database', customer_id });
               }
           });
       });
@@ -150,12 +151,59 @@ const readDetailedExcelData = async () => {
 
 
 
-
+function formatDate(date) {
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0'); // January is 0!
+    const yyyy = date.getFullYear();
+    return yyyy + '-' + mm + '-' + dd ;
+  }
+  
+  
+  function getCurrentWeekDates() {
+    const today = new Date();
+    const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+    const endOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (7 - today.getDay()));
+    return { startDate: formatDate(startOfWeek), endDate: formatDate(endOfWeek) };
+  }
+  // Function to get the start and end dates of the current month
+  
+  function getCurrentMonthDates() {
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    return { startDate: formatDate(startOfMonth), endDate: formatDate(endOfMonth) };
+  }
+  
+  function getLastMonthDates() {
+    const today = new Date();
+    const firstDayOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    return { startDate: formatDate(firstDayOfLastMonth), endDate: formatDate(lastDayOfLastMonth) };
+  }
+  
+  // Function to get the start and end dates of the current year
+  
+  function getCurrentYearDates() {
+  
+      const today = new Date();
+  
+      const startOfYear = new Date(today.getFullYear(), 0, 1);
+  
+      const endOfYear = new Date(today.getFullYear(), 11, 31);
+  
+      return { startDate: formatDate(startOfYear), endDate: formatDate(endOfYear) };
+  
+  }
+  
 
   module.exports = {
     userAuthenticationToken,
     adminAuthenticationToken,
-    readDetailedExcelData
+    readDetailedExcelData,
+    getCurrentWeekDates,
+    getCurrentMonthDates,
+    getLastMonthDates,
+    getCurrentYearDates
   }
 
 

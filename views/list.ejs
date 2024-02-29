@@ -45,6 +45,7 @@
                                             <th>Name</th>
                                             <th>Number</th>
                                             <th>Percentage</th>
+                                            <th>Reports</th>
                                             <th>Update Data</th>
                                             <th>Delete Data</th>
 
@@ -75,6 +76,13 @@
                                                 <td><span>
                                                     <%=result[i].percentage%>
                                                 </span></td>
+
+
+                                                <td>
+                                                    <a href="/admin/customer/dashboard?unique_id=<%=result[i].unique_id%>"
+                                                        target="_blank"><span
+                                                            class="badge badge-success light border-0">View Reports</span></a>
+                                                </td>
 
                                                 <td>
                                                     <a href="/admin/dashboard/update/data?id=<%=result[i].id%>"

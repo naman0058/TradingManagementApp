@@ -194,4 +194,98 @@ router.get('/dashboard/linked/account', async (req, res) => {
 router.get('/dashboard/add/csv',verify.adminAuthenticationToken,(req,res)=>{
   res.render(`add_csv`,{msg:''})
 })
+
+
+
+router.get('/customer/dashboard', verify.adminAuthenticationToken, (req, res) => {
+  var getCurrentWeekDates = verify.getCurrentWeekDates();
+  var getCurrentMonthDates = verify.getCurrentMonthDates();
+  var getLastMonthDates = verify.getLastMonthDates();
+  var getCurrentYearDates = verify.getCurrentYearDates();
+  var weeklyreport = `select COALESCE(sum(actual_pl), 0) as weekly_actual_pl from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getCurrentWeekDates.startDate}' and '${getCurrentWeekDates.endDate}';`;
+  var monthlyreport = `select COALESCE(sum(actual_pl), 0) as monthly_actual_pl from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getCurrentMonthDates.startDate}' and '${getCurrentMonthDates.endDate}';`;
+  var lastmonthreport = `select COALESCE(sum(actual_pl), 0) as last_month_actual_pl from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getLastMonthDates.startDate}' and '${getLastMonthDates.endDate}';`;
+  var yearlyreport = `select COALESCE(sum(actual_pl), 0) as yearly_actual_pl from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getCurrentYearDates.startDate}' and '${getCurrentYearDates.endDate}';`;
+  var lasttrade = `select * from short_report where unique_id = '${req.query.unique_id}' order by str_to_date(date, '%d-%m-%Y') desc limit 30;`
+  pool.query(weeklyreport + monthlyreport + lastmonthreport + yearlyreport+lasttrade, (err, result) => {
+      if (err) throw err;
+      else res.render(`customerdashboard`,{result,unique_id:req.query.unique_id})
+      // else res.json(result);
+  });
+});
+
+
+
+router.get('/bar-graph', (req, res) => {
+  var query = `SELECT
+      IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+  FROM
+      (
+          SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
+          SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+          SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+          SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+      ) AS months
+  LEFT JOIN
+      short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month AND YEAR(STR_TO_DATE(sr.date, '%d-%m-%Y')) = YEAR(CURDATE()) and unique_id = '${req.query.unique_id}'
+  GROUP BY
+      months.month
+  ORDER BY
+      months.month;`;
+  pool.query(query, (err, result) => {
+      if (err) {
+          throw err;
+      } else {
+          const totalActualPl = result.map(item => item.total_actual_pl);
+          res.json(totalActualPl);
+      }
+  });
+});
+
+
+
+router.get('/commission-graph', (req, res) => {
+  var query = `SELECT
+      IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+  FROM
+      (
+          SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
+          SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+          SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+          SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+      ) AS months
+  LEFT JOIN
+      short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month AND YEAR(STR_TO_DATE(sr.date, '%d-%m-%Y')) = YEAR(CURDATE()) and unique_id = '${req.query.unique_id}'
+  GROUP BY
+      months.month
+  ORDER BY
+      months.month;`;
+  pool.query(query, (err, result) => {
+      if (err) {
+          throw err;
+      } else {
+          const dataWithCommission = result.map(item => {
+              const totalActualPl = parseFloat(item.total_actual_pl);
+              const commission = totalActualPl * 0.2;
+              return { total_actual_pl: totalActualPl, commission: commission };
+          });
+
+          const totalActualPl = dataWithCommission.map(item => item.commission);
+          res.json(totalActualPl);
+          // res.json(dataWithCommission);
+      }
+  });
+});
+
+
+
+
+router.get('/customer/trade/details',(req,res)=>{
+  var query = `select * from detail_report where date = '${req.query.date}' and unique_id = '${req.query.unique_id}';`
+  pool.query(query,(err,result)=>{
+    if(err) throw err;
+    else res.render('trade_list',{result})
+  })
+})
+
 module.exports = router;

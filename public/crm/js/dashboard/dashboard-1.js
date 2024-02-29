@@ -361,22 +361,31 @@
 		chartBar1.render();
 	 
 	}
-	
+
+let commissionData = []
+
+let unique_id = $('#unique_id').val()
+
+
+$.getJSON(`/admin/commission-graph?unique_id=${unique_id}`,data=>{
+	commissionData = data
+})
+
+
 	var overiewChart = function(){
+
+$.getJSON(`/admin/bar-graph?unique_id=${unique_id}`,data=>{
+	bargraphdata = data
 		 var options = {
           series: [{
-          name: 'Number of Projects',
+          name: 'Client Profit',
           type: 'column',
-          data: [75, 85, 72, 100, 50, 100, 80, 75, 95, 35, 75,100]
+          data: bargraphdata
         }, {
           name: 'Revenue',
           type: 'area',
-          data: [44, 65, 55, 75, 45, 55, 40, 60, 75, 45, 50,42]
-        }, {
-          name: 'Active Projects',
-          type: 'line',
-          data: [30, 25, 45, 30, 25, 35, 20, 45, 35, 20, 35,20]
-        }],
+          data: commissionData
+        }, ],
           chart: {
           height: 300,
           type: 'line',
@@ -491,7 +500,7 @@
           y: {
             formatter: function (y) {
               if (typeof y !== "undefined") {
-                return y.toFixed(0) + " points";
+                return "Rs. " + y.toFixed(0);
               }
               return y;
         
@@ -551,7 +560,8 @@
 				}
 			]);
 		})
-	 
+	})
+
 	}
 	var earningChart = function(){
 		

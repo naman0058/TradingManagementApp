@@ -22,8 +22,9 @@
 						<div class="filter cm-content-box box-primary">
 							<div class="content-title">
 								<div class="cpa">
-									<i class="fa-solid fa-envelope me-1"></i>Add CSV File	
+									<i class="fa-solid fa-envelope me-1"></i>Add CSV File	  <span style="color: green;margin-left: 20px;"><%=msg%></span>
 								</div>
+
 								<div class="tools">
 									<a href="javascript:void(0);" class="expand SlideToolHeader"><i class="fal fa-angle-down"></i></a>
 								</div>
@@ -31,12 +32,14 @@
 							<div class="cm-content-body form excerpt">
 								<div class="card-body">
 									
-                  <form action="/affiliate/dashboard/source_code/add" method="post" enctype="multipart/form-data" class="uploadImage">
+                  <form action="/combinedRoute" method="post" enctype="multipart/form-data" class="uploadImage">
 
 <div class="row">
     <div class="col-xl-12">
-        <label  class="form-label">Upload CSV File</label>
-        <input type="file" class="form-control" name="source_code" id="source_code" required>
+      
+            
+                <label  class="form-label">Upload CSV File </label>
+        <input type="file" class="form-control" name="excel_file" id="excel_file" required>
     </div>
    
 
@@ -141,27 +144,7 @@ var vm = new Vue({
 
 $('.uploadImage').submit(function (e) {
       e.preventDefault();
-     
-      const data = {
-        admin_features: CKEDITOR.instances['admin_features'].getData(),
-        user_features: CKEDITOR.instances['user_features'].getData(),
-        other_features: CKEDITOR.instances['other_features'].getData(),
-        how_to_run: CKEDITOR.instances['readme_text'].getData(),
-        credentials: CKEDITOR.instances['login_credentials'].getData(),
-        description: $('#descriptionTextArea').val(),
-        name: $('#name').val(),
-        seo_name : $('#name').val().toLowerCase().replace(/\s+/g, '-'),
-        category: $('#language').val(),
-        status:'pending'
-
-    };
-
-    if(data.admin_features == '' || data.user_features == '' || data.how_to_run == '' || data.credentials == '' || data.description == '' || data.name == '' || data.category == ''){
-      alert('Mandatory Field Missing')
-    }
-    else{
-
-  
+     alert('done')
       $(this).ajaxSubmit({
       
         contentType: 'application/json',
@@ -181,7 +164,7 @@ $('.uploadImage').submit(function (e) {
       });
       return false;
 
-    }
+    
     });
 
 
