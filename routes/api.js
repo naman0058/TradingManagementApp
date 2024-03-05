@@ -43,7 +43,7 @@ router.get('/user/dashboard', verify.userAuthenticationToken, async (req, res) =
         const monthlyreport = `SELECT COALESCE(SUM(actual_pl), 0) AS monthly_actual_pl FROM short_report WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ?;`;
         const lastmonthreport = `SELECT COALESCE(SUM(actual_pl), 0) AS last_month_actual_pl FROM short_report WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ?;`;
         const yearlyreport = `SELECT COALESCE(SUM(actual_pl), 0) AS yearly_actual_pl FROM short_report WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ?;`;
-        const lasttrade = `SELECT * FROM short_report WHERE unique_id = ? ORDER BY str_to_date(date, '%d-%m-%Y') DESC LIMIT 5;`;
+        const lasttrade = `SELECT * FROM short_report WHERE unique_id = ? ORDER BY str_to_date(date, '%d-%m-%Y') DESC LIMIT 1;`;
 
         const queryParams = [
             req.data,
@@ -71,9 +71,17 @@ router.get('/user/dashboard', verify.userAuthenticationToken, async (req, res) =
 
 
 router.get('/user/latests-trade', verify.userAuthenticationToken, async (req, res) => {
+    var getCurrentYearDates = verify.getCurrentYearDates();
+
     try {
-        const query = 'SELECT * FROM short_report WHERE unique_id = ?';
-        const result = await queryAsync(query, [req.data]);
+        const query = `
+            SELECT *, 
+                (SELECT SUM(actual_pl) FROM short_report WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN '${getCurrentYearDates.startDate}' AND '${getCurrentYearDates.endDate}') AS total_sum 
+            FROM short_report 
+            WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN '${getCurrentYearDates.startDate}' AND '${getCurrentYearDates.endDate}' 
+            ORDER BY str_to_date(date, '%d-%m-%Y') DESC`;
+        
+        const result = await queryAsync(query, [req.data, req.data]);
 
         res.json(result);
     } catch (error) {
@@ -81,6 +89,7 @@ router.get('/user/latests-trade', verify.userAuthenticationToken, async (req, re
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 
 
@@ -115,6 +124,27 @@ router.post('/user/report/search', verify.userAuthenticationToken, async (req, r
     }
 });
 
+
+
+    router.get('/user/last/trade',verify.userAuthenticationToken,(req,res)=>{
+        
+    pool.query(`select date,actual_pl from short_report where unique_id = '${req.data}' order by str_to_date(date, '%d-%m-%Y') desc limit 1`,(err,result)=>{
+        if(err) throw err;
+        else if(result[0]){
+            let last_date = result[0].date;
+            let last_pl = result[0].actual_pl;
+            pool.query(`select * from detail_report where date = '${last_date}'`,(err,result)=>{
+                if(err) throw err;
+                else {
+                    res.json({result:result,last_date:last_date,last_pl:last_pl})
+                }
+            })
+        }
+        else {
+        res.json(result)
+        }
+    })
+    })
 
 
 
