@@ -8,7 +8,8 @@ const xlsx = require('xlsx');
 var pool = require('./pool');
 
 
-
+const util = require('util');
+const queryAsync = util.promisify(pool.query).bind(pool);
 
 
 
@@ -50,6 +51,26 @@ function adminAuthenticationToken(req,res,next){
     next()
   }
 }
+
+
+async function userAuthenticationToken(req, res, next) {
+    try {
+        const result = await queryAsync('SELECT * FROM users WHERE unique_id = ?', [req.query.unique_id]);
+
+        if (result.length > 0) {
+            req.data = req.query.unique_id;
+            next();
+        } else {
+            res.status(401).json({ msg: 'Invalid User ID' });
+            // If you're continuing the middleware chain after sending a response,
+            // you shouldn't call next() after sending the response.
+        }
+    } catch (error) {
+        console.error('Error while verifying user authentication token:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 
 
 const readDetailedExcelData = async () => {
@@ -217,7 +238,8 @@ function formatDate(date) {
     getCurrentWeekDates,
     getCurrentMonthDates,
     getLastMonthDates,
-    getCurrentYearDates
+    getCurrentYearDates,
+    userAuthenticationToken
   }
 
 
