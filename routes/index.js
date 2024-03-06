@@ -259,7 +259,7 @@ router.get("/", function (req, res, next) {
 
 
 router.post('/combinedRoute',upload.single('excel_file'), async (req, res) => {
-
+console.log('run')
   try {
 
     // Call the first route logic
@@ -351,11 +351,11 @@ async function insertOrUpdateDetailedData(row) {
           pool.query(insertQuery, (err, result) => {
 
             if (err) {
-
+console.log(err);
               reject(err);
 
             } else {
-
+console.log('done');
               resolve();
 
             }
@@ -601,6 +601,11 @@ async function getUserData(customer_id) {
   });
 
 }
+
+
+
+// 
+// 
 
 
 module.exports = router;

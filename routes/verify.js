@@ -180,18 +180,32 @@ function formatDate(date) {
     const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
     return { startDate: formatDate(firstDayOfLastMonth), endDate: formatDate(lastDayOfLastMonth) };
   }
+
   
   // Function to get the start and end dates of the current year
   
   function getCurrentYearDates() {
   
-      const today = new Date();
+    //   const today = new Date();
   
-      const startOfYear = new Date(today.getFullYear(), 0, 1);
+    //   const startOfYear = new Date(today.getFullYear(), 3, 1);
+
+    //   const endOfYear = new Date(today.getFullYear(), 2, 31);
   
-      const endOfYear = new Date(today.getFullYear(), 11, 31);
-  
-      return { startDate: formatDate(startOfYear), endDate: formatDate(endOfYear) };
+    //   return { startDate: formatDate(startOfYear), endDate: formatDate(endOfYear) };
+
+    const today = new Date();
+   // Check if the current month is April or later
+   // If so, the financial year starts from April of the current year
+   // Otherwise, it starts from April of the previous year
+   const startYear = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+   // The financial year ends on March 31st of the following year
+   const endYear = today.getMonth() >= 3 ? today.getFullYear() + 1 : today.getFullYear();
+   // Set the start date to April 1st of the start year
+   const startDate = new Date(startYear, 3, 1);
+   // Set the end date to March 31st of the end year
+   const endDate = new Date(endYear, 2, 31);
+   return { startDate: formatDate(startDate), endDate: formatDate(endDate) };
   
   }
   

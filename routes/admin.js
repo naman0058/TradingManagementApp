@@ -61,6 +61,9 @@ router.get('/dashboard/add/customer',verify.adminAuthenticationToken,(req,res)=>
   res.render(`add_customer`,{msg:''})
 })
 
+
+console.log(verify.getCurrentYearDates())
+
 router.get('/dashboard/report',verify.adminAuthenticationToken,(req,res)=>{
   res.render(`report`,{msg:''})
 })
@@ -241,20 +244,24 @@ router.get('/customer/dashboard', verify.adminAuthenticationToken, (req, res) =>
 
 router.get('/bar-graph', (req, res) => {
   var query = `SELECT
-      IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
-  FROM
-      (
-          SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
-          SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-          SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-          SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
-      ) AS months
-  LEFT JOIN
-      short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month AND YEAR(STR_TO_DATE(sr.date, '%d-%m-%Y')) = YEAR(CURDATE()) and unique_id = '${req.query.unique_id}'
-  GROUP BY
-      months.month
-  ORDER BY
-      months.month;`;
+  IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+FROM
+  (
+      SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
+      SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+      SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+      SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+  ) AS months
+LEFT JOIN
+  short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
+                      AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
+                          DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
+                          AND DATE_FORMAT(CURDATE(), '%Y-03-31')
+                      AND unique_id = '${req.query.unique_id}'
+GROUP BY
+  months.month
+ORDER BY
+  months.month;`;
   pool.query(query, (err, result) => {
       if (err) {
           throw err;
@@ -269,20 +276,24 @@ router.get('/bar-graph', (req, res) => {
 
 router.get('/commission-graph', (req, res) => {
   var query = `SELECT
-      IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
-  FROM
-      (
-          SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
-          SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-          SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-          SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
-      ) AS months
-  LEFT JOIN
-      short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month AND YEAR(STR_TO_DATE(sr.date, '%d-%m-%Y')) = YEAR(CURDATE()) and unique_id = '${req.query.unique_id}'
-  GROUP BY
-      months.month
-  ORDER BY
-      months.month;`;
+  IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+FROM
+  (
+      SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
+      SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+      SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+      SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+  ) AS months
+LEFT JOIN
+  short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
+                      AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
+                          DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
+                          AND DATE_FORMAT(CURDATE(), '%Y-03-31')
+                      AND unique_id = '${req.query.unique_id}'
+GROUP BY
+  months.month
+ORDER BY
+  months.month;`;
   pool.query(query, (err, result) => {
       if (err) {
           throw err;
@@ -293,7 +304,7 @@ router.get('/commission-graph', (req, res) => {
               return { total_actual_pl: totalActualPl, commission: commission };
           });
 
-          const totalActualPl = dataWithCommission.map(item => item.commission);
+          const totalActualPl = dataWithCommission.map(item => item.commission.toFixed(2));
           res.json(totalActualPl);
           // res.json(dataWithCommission);
       }
@@ -304,20 +315,23 @@ router.get('/commission-graph', (req, res) => {
 
 router.get('/dashboard/bar-graph', (req, res) => {
   var query = `SELECT
-      IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
-  FROM
-      (
-          SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
-          SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-          SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-          SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
-      ) AS months
-  LEFT JOIN
-      short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month AND YEAR(STR_TO_DATE(sr.date, '%d-%m-%Y')) = YEAR(CURDATE())
-  GROUP BY
-      months.month
-  ORDER BY
-      months.month;`;
+  IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+FROM
+  (
+      SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
+      SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+      SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+      SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+  ) AS months
+LEFT JOIN
+  short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
+                      AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
+                          DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
+                          AND DATE_FORMAT(CURDATE(), '%Y-03-31')
+GROUP BY
+  months.month
+ORDER BY
+  months.month;`;
   pool.query(query, (err, result) => {
       if (err) {
           throw err;
@@ -331,20 +345,23 @@ router.get('/dashboard/bar-graph', (req, res) => {
 
 router.get('/dashboard/commission-graph', (req, res) => {
   var query = `SELECT
-      IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
-  FROM
-      (
-          SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
-          SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-          SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-          SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
-      ) AS months
-  LEFT JOIN
-      short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month AND YEAR(STR_TO_DATE(sr.date, '%d-%m-%Y')) = YEAR(CURDATE())
-  GROUP BY
-      months.month
-  ORDER BY
-      months.month;`;
+  IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+FROM
+  (
+      SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
+      SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+      SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+      SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+  ) AS months
+LEFT JOIN
+  short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
+                      AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
+                          DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
+                          AND DATE_FORMAT(CURDATE(), '%Y-03-31')
+GROUP BY
+  months.month
+ORDER BY
+  months.month;`;
   pool.query(query, (err, result) => {
       if (err) {
           throw err;
@@ -368,6 +385,7 @@ router.get('/customer/trade/details',(req,res)=>{
   pool.query(query,(err,result)=>{
     if(err) throw err;
     else res.render('trade_list',{result})
+    //  else res.json(result)
   })
 })
 
