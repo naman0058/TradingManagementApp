@@ -5,6 +5,46 @@ var verify = require("./verify");
 const fs = require("fs");
 const xlsx = require("xlsx");
 var upload = require('./multer');
+// var fetch = require('node-fetch')
+const { Expo } = require('expo-server-sdk')
+const request = require('request');
+
+
+async function sendNotification(customer_id){
+
+  pool.query(`select token from users where unique_id from where unique_id = '${customer_id}'`,(err,result)=>{
+    if(err) throw err;
+    else{
+      const message = {
+        to: result[0].token,
+        sound: 'default',
+        title: `New Trade Updated`,
+        body: ``,
+        data: { someData: 'goes here' },
+      };
+      
+      
+      request.post('https://exp.host/--/api/v2/push/send').form({message})   
+              request.post({url:'https://exp.host/--/api/v2/push/send',body: JSON.stringify(message)} , function(err,httpResponse,data){
+                  console.log('sending data',message)
+                  if(err) throw err;
+                  else return data;
+               })
+      
+    }
+  })
+
+
+// fetch('https://exp.host/--/api/v2/push/send', {
+//                             method: 'POST',
+//                             headers: {
+//                               Accept: 'application/json',
+//                               'Accept-encoding': 'gzip, deflate',
+//                               'Content-Type': 'application/json',
+//                             },
+//                             body: JSON.stringify(message),
+//                           });
+}
 
 
 router.get("/short-report", (req, res) => {
@@ -293,7 +333,7 @@ console.log('run')
           let customer_id = data[1].__EMPTY;
     
         
-    
+           
           const userData = await getUserData(customer_id);
     
           if (userData.length > 0) {
@@ -305,6 +345,8 @@ console.log('run')
             const combinedResult = getCombinedResult(filteredData, customer_id, title);
     
             await insertOrUpdateShortReport(combinedResult);
+
+            // await sendNotification(customer_id)
     
             res.render('add_csv',{msg:'File Uploaded Successfully'})
     
