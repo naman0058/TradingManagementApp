@@ -22,6 +22,91 @@
 			<div class="container-fluid">
 				<div class="row">
 					<div class="col-xl-12 wid-100">
+
+						<h3 class="text-primary">Our Profit</h3>
+
+						<div class="row">
+							<div class="col-xl-3 col-sm-6">
+								<div class="card chart-grd same-card">
+									<div class="card-body depostit-card p-0">
+										<div class="depostit-card-media d-flex justify-content-between pb-0">
+											<div>
+												<h6>Weekly Commission</h6>
+												<%
+// Calculate the discounted value
+var weekly_actual_pl = result[0][0].weekly_actual_pl * 0.2;
+%>
+												<h3>Rs. <%=weekly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+							</div>
+
+                            <div class="col-xl-3 col-sm-6">
+								<div class="card chart-grd same-card">
+									<div class="card-body depostit-card p-0">
+										<div class="depostit-card-media d-flex justify-content-between pb-0">
+											<div>
+												<h6>Monthly Commission</h6>
+												<%
+// Calculate the discounted value
+var monthly_actual_pl = result[1][0].monthly_actual_pl * 0.2;
+%>
+												<h3>Rs.<%=monthly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+							</div>
+
+                            <div class="col-xl-3 col-sm-6">
+								<div class="card chart-grd same-card">
+									<div class="card-body depostit-card p-0">
+										<div class="depostit-card-media d-flex justify-content-between pb-0">
+											<div>
+												<h6>Last Month Commission</h6>
+												<%
+// Calculate the discounted value
+var last_month_actual_pl = result[2][0].last_month_actual_pl * 0.2;
+%>
+												<h3>Rs.<%=last_month_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+                            <div class="col-xl-3 col-sm-6">
+								<div class="card chart-grd same-card">
+									<div class="card-body depostit-card p-0">
+										<div class="depostit-card-media d-flex justify-content-between pb-0">
+											<div>
+												<h6>Yearly Commission</h6>
+												<%
+												// Calculate the discounted value
+												var yearly_actual_pl = result[3][0].yearly_actual_pl * 0.2;
+												%>
+												<h3>Rs.<%=yearly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
+											</div>
+											
+										</div>
+										<div id="NewCustomers"></div>
+
+									</div>
+								</div>
+							</div>
+
+                           
+						
+						
+						</div>
+
+						<h3 class="text-primary">Customer Profit</h3>
 						<div class="row">
 							<div class="col-xl-3 col-sm-6">
 								<div class="card chart-grd same-card">
@@ -76,7 +161,7 @@
 											</div>
 											
 										</div>
-										<div id="NewCustomers"></div>
+										<div id="NewExperience"></div>
 
 									</div>
 								</div>

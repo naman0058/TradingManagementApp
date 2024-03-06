@@ -573,7 +573,7 @@ $.getJSON(`/admin/bar-graph?unique_id=${unique_id}`,data=>{
 				  series: [{
 				  name: 'Revenue',
 				  type: 'column',
-				  data: bargraphdata
+				  data: bargraphdata	
 				}, {
 				  name: 'Revenue',
 				  type: 'area',
