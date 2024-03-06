@@ -29,7 +29,7 @@
 										<div class="depostit-card-media d-flex justify-content-between pb-0">
 											<div>
 												<h6>Weekly Profit</h6>
-												<h3>Rs. <%=result[0][0].weekly_actual_pl.toFixed(2)%></h3>
+												<h3>Rs. <%=result[0][0].weekly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
 											</div>
 											
 										</div>
@@ -43,7 +43,7 @@
 										<div class="depostit-card-media d-flex justify-content-between pb-0">
 											<div>
 												<h6>Monthly Profit</h6>
-												<h3>Rs.<%=result[1][0].monthly_actual_pl.toFixed(2)%></h3>
+												<h3>Rs.<%=result[1][0].monthly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
 											</div>
 											
 										</div>
@@ -57,7 +57,7 @@
 										<div class="depostit-card-media d-flex justify-content-between pb-0">
 											<div>
 												<h6>Last Month Profit</h6>
-												<h3>Rs.<%=result[2][0].last_month_actual_pl.toFixed(2)%></h3>
+												<h3><%=result[2][0].last_month_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
 											</div>
 											
 										</div>
@@ -72,7 +72,7 @@
 										<div class="depostit-card-media d-flex justify-content-between pb-0">
 											<div>
 												<h6>Yearly Profit</h6>
-												<h3>Rs.<%=result[3][0].yearly_actual_pl.toFixed(2)%></h3>
+												<h3>Rs.<%=result[3][0].yearly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
 											</div>
 											
 										</div>
