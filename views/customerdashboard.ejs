@@ -161,6 +161,64 @@
 							</div>
 						</div>
 					</div>
+
+
+
+					<div class="col-xl-12 bst-seller">
+						<div class="card">
+							<div class="card-body p-0">
+								<div class="table-responsive active-projects style-1 ItemsCheckboxSec shorting ">
+								<div class="tbl-caption">
+									<h4 class="heading mb-0">Cash Trade</h4>
+								
+								</div>
+									<table id="empoloyees-tbl" class="table">
+										<thead>
+                                            <tr>
+												<th>
+													<div class="form-check custom-checkbox ms-0">
+														<input type="checkbox" class="form-check-input checkAllInput" id="checkAll2" required="">
+														<label class="form-check-label" for="checkAll2"></label>
+													</div>
+												</th>
+                                                <th>Date</th>
+                                                <th>Trade Name</th>
+                                                <th>Amount</th>
+                                              
+                                            </tr>
+                                        </thead>
+										<tbody>
+
+                                            <% for(i=0;i<result[5].length;i++){ %>
+
+											<tr>
+												<td>
+													<div class="form-check custom-checkbox">
+														<input type="checkbox" class="form-check-input" id="customCheckBox0100" required="">
+														<label class="form-check-label" for="customCheckBox0100"></label>
+													</div>
+												</td>
+												<td><span><%=result[5][i].date%></span></td>
+												<td><span>Rs. <%=result[5][i].trade_name%></span></td>
+												<td><span>Rs. <%=result[5][i].amount%></span></td>
+                            
+												
+                                              
+												
+											
+											</tr>
+
+                                            <% } %>
+											
+											
+											
+										</tbody>
+										
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			
 			</div>

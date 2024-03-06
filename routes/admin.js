@@ -305,8 +305,10 @@ router.get('/customer/dashboard', verify.adminAuthenticationToken, (req, res) =>
   var monthlyreport = `select COALESCE(sum(actual_pl), 0) as monthly_actual_pl from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getCurrentMonthDates.startDate}' and '${getCurrentMonthDates.endDate}';`;
   var lastmonthreport = `select COALESCE(sum(actual_pl), 0) as last_month_actual_pl from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getLastMonthDates.startDate}' and '${getLastMonthDates.endDate}';`;
   var yearlyreport = `select COALESCE(sum(actual_pl), 0) as yearly_actual_pl from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getCurrentYearDates.startDate}' and '${getCurrentYearDates.endDate}';`;
-  var lasttrade = `select * from short_report where unique_id = '${req.query.unique_id}' order by str_to_date(date, '%d-%m-%Y') desc limit 30;`
-  pool.query(weeklyreport + monthlyreport + lastmonthreport + yearlyreport+lasttrade, (err, result) => {
+  var lasttrade = `select * from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getCurrentYearDates.startDate}' and '${getCurrentYearDates.endDate}' order by str_to_date(date, '%d-%m-%Y') desc;`
+  var cashtrade = `select * from cash where unique_id = '${req.query.unique_id}' and date between '${getCurrentYearDates.startDate}' and '${getCurrentYearDates.endDate}' order by date desc;`
+ 
+  pool.query(weeklyreport + monthlyreport + lastmonthreport + yearlyreport+lasttrade+cashtrade, (err, result) => {
       if (err) throw err;
       else res.render(`customerdashboard`,{result,unique_id:req.query.unique_id})
       // else res.json(result);
