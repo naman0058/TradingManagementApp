@@ -178,6 +178,12 @@ function formatDate(date) {
     const yyyy = date.getFullYear();
     return yyyy + '-' + mm + '-' + dd ;
   }
+
+
+  function getCurrentDate() {
+    const today = new Date();
+    return formatDate(today);
+  }
   
   
   function getCurrentWeekDates() {
@@ -229,6 +235,7 @@ function formatDate(date) {
    return { startDate: formatDate(startDate), endDate: formatDate(endDate) };
   
   }
+
   
 
   module.exports = {
@@ -239,7 +246,8 @@ function formatDate(date) {
     getCurrentMonthDates,
     getLastMonthDates,
     getCurrentYearDates,
-    userAuthenticationToken
+    userAuthenticationToken,
+    getCurrentDate
   }
 
 

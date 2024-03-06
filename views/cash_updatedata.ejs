@@ -10,7 +10,7 @@
 			<div class="page-titles">
 					<ol class="breadcrumb">
 						<li class="breadcrumb-item"><a href="javascript:void(0)">CMS</a></li>
-						<li class="breadcrumb-item active"><a href="javascript:void(0)">Add Customer</a></li>
+						<li class="breadcrumb-item active"><a href="javascript:void(0)">Update Cash</a></li>
 					</ol>
                 </div>
 			<div class="container-fluid">
@@ -21,7 +21,7 @@
 						<div class="filter cm-content-box box-primary">
 							<div class="content-title">
 								<div class="cpa">
-									<i class="fa-solid fa-envelope me-1"></i>Add Customer	
+									<i class="fa-solid fa-envelope me-1"></i>Update Cash
 								</div>
 								<div class="tools">
 									<a href="javascript:void(0);" class="expand SlideToolHeader"><i class="fal fa-angle-down"></i></a>
@@ -31,44 +31,31 @@
 								<div class="card-body">
 									
 
-<div class="row">
-    <div class="col-xl-6">
-        <label  class="form-label">Name</label>
-        <input type="text" class="form-control" id="name">
-    </div>
-    <div class="col-xl-6">
-        <label  class="form-label">Number</label>
-        <!-- <input type="text" class="form-control" id="language"> -->
-        <input type="text" class="form-control" id="number">
-
-    </div>
-
-</div>
-
+                                    <div class="row">
+                                        <div class="col-xl-12">
+                                            <label  class="form-label">Choose Customer</label>
+                                            <input type="hidden" value="<%=result[0].id%>" id="id" name="id">
+                                            <input type="text" value="<%=result[0].unique_id%>" id="unique_id" name="unique_id" class="form-control" readonly>
+                                        </div>
 
 <div class="row" style="margin-top: 20px;">
     <div class="col-xl-6">
-        <label  class="form-label">Unique ID</label>
-        <input type="text" class="form-control" id="unique_id">
+        <label  class="form-label">Trade Name</label>
+        <input type="text" class="form-control" id="trade_name" name="trade_name" value="<%=result[0].trade_name%>">
     </div>
     <div class="col-xl-6">
-        <label  class="form-label">Pasword</label>
+        <label  class="form-label">Amount</label>
         <!-- <input type="text" class="form-control" id="language"> -->
-        <input type="password" class="form-control" id="password">
+        <input type="number" class="form-control" id="amount" name="amount" value="<%=result[0].amount%>">
+
 
     </div>
 
 </div>
 
 
-<div class="row" style="margin-top: 20px;">
-    <div class="col-xl-12">
-        <label  class="form-label">Profit Percentage</label>
-        <input type="text" class="form-control" id="percentage">
-    </div>
-  
 
-</div>
+
 
                                         
 
@@ -88,6 +75,10 @@
 						</div>
 					</div>
 				</div>
+
+                <div class="row">
+                    <div id="result"></div>
+                </div>
 			</div>
 		</div>
 		
@@ -111,26 +102,26 @@
 
  $('.save').click(function() {
     const data = {
-        name: $('#name').val(),
-        number : $('#number').val(),
+        trade_name: $('#trade_name').val(),
+        amount : $('#amount').val(),
         unique_id: $('#unique_id').val(),
-        password: $('#password').val(),
-        percentage: $('#percentage').val()
+        id: $('#id').val(),
+
 
 
     };
 
-    if(data.name == '' || data.number == '' || data.unique_id == '' || data.password == '' || data.percentage == '') {
+    if(data.unique_id == '' || data.from_date == '' || data.to_date == '') {
    alert('Mandatory Field Missing');
-} else if(!/^\d{10}$/.test(data.number)) {
-   alert('Enter Correct Mobile Number');
-}
+} 
     else{
 
       console.log(data)
 
-$.post('/admin/dashboard/customer/add', data)
+$.post('/admin/cash/upload/data', data)
 .done(function(response) {
+    console.log(response)
+    
     if (response.msg === 'success') {
         alert('Successfully updated');
         window.location.reload();
@@ -149,6 +140,30 @@ $.post('/admin/dashboard/customer/add', data)
 
 });
 
+$.getJSON(`/admin/dashboard/users/show`, data => {
+    addgroup = data
+    console.log('leagues',data)
+    fillDropDown('language', data, 'Choose Customer', 0)
+
+  
+})
+
+
+
+
+
+function fillDropDown(id, data, label, selectedid = 0) {
+    $(`#${id}`).empty()
+    $(`#${id}`).append($('<option>').val("null").text(label))
+
+    $.each(data, (i, item) => {
+        if (item.id == selectedid) {
+            $(`#${id}`).append($('<option selected>').val(item.unique_id).text(item.name))
+        } else {
+            $(`#${id}`).append($('<option>').val(item.unique_id).text(item.name))
+        }
+    })
+}
 
 
         </script>

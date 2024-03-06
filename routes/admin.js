@@ -62,6 +62,11 @@ router.get('/dashboard/add/customer',verify.adminAuthenticationToken,(req,res)=>
 })
 
 
+router.get('/dashboard/add/cash',verify.adminAuthenticationToken,(req,res)=>{
+  res.render(`add_cash`,{msg:''})
+})
+
+
 console.log(verify.getCurrentYearDates())
 
 router.get('/dashboard/report',verify.adminAuthenticationToken,(req,res)=>{
@@ -97,6 +102,28 @@ router.post('/dashboard/customer/add', async (req, res) => {
 });
 
 
+
+router.post('/cash/add', async (req, res) => {
+
+
+  try {
+  req.body['date'] = verify.getCurrentDate()
+     console.log(req.body)
+      // Insert new record
+      const insertResult = await queryAsync('INSERT INTO cash SET ?', req.body);
+
+      if (insertResult.affectedRows > 0) {
+          res.json({ msg: 'success' });
+      } else {
+          res.json({ msg: 'error' });
+      }
+  } catch (error) {
+      console.error('Error in cash/add:', error);
+      res.status(500).json({ msg: 'error' });
+  }
+});
+
+
 router.get('/dashboard/customer/list', async (req, res) => {
   try {
     let query = `SELECT * FROM users`;
@@ -110,11 +137,34 @@ router.get('/dashboard/customer/list', async (req, res) => {
 
 
 
+ router.get('/dashboard/cash/list', async (req, res) => {
+  try {
+    let query = `SELECT * FROM cash`;
+    const result = await queryAsync(query);
+    res.render(`cashlist`, { result });
+  } catch (error) {
+    console.error('Error executing query:', error);
+    res.status(500).send('Internal Server Error');
+  }
+ });
+
+
  router.get('/dashboard/update/data',(req,res)=>{
   let id = req.query.id;
   pool.query(`select * from users where id = ${id}`,(err,result)=>{
     if(err) throw err;
     else res.render(`updatedata`,{result})
+  })
+  
+})
+
+
+
+router.get('/dashboard/cash/update/data',(req,res)=>{
+  let id = req.query.id;
+  pool.query(`select * from cash where id = ${id}`,(err,result)=>{
+    if(err) throw err;
+    else res.render(`cash_updatedata`,{result})
   })
   
 })
@@ -133,11 +183,34 @@ router.post('/dashboard/upload/data', (req, res) => {
 });
 
 
+
+router.post('/cash/upload/data', (req, res) => {
+  console.log('req.body', req.body);
+  pool.query('UPDATE cash SET ? WHERE id = ?', [req.body, req.body.id], (err, result) => {
+      if (err) {
+          console.error('Error updating data:', err);
+          return res.status(500).json({ msg: 'error' });
+      }
+      res.json({ msg: 'success' });
+  });
+});
+
+
 router.get('/dashboard/delete/data',(req,res)=>{
   let id = req.query.id;
   pool.query(`delete from users where id = ${id}`,(err,result)=>{
     if(err) throw err;
     else res.redirect('/admin/dashboard/customer/list')
+  })
+  
+})
+
+
+router.get('/dashboard/cash/delete/data',(req,res)=>{
+  let id = req.query.id;
+  pool.query(`delete from cash where id = ${id}`,(err,result)=>{
+    if(err) throw err;
+    else res.redirect('/admin/dashboard/cash/list')
   })
   
 })
