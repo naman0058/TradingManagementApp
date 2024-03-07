@@ -153,4 +153,51 @@ router.post('/user/report/search', verify.userAuthenticationToken, async (req, r
 
 
 
+    router.get('/user/linked/account',verify.userAuthenticationToken, async (req, res) => {
+        console.log(req.query)
+        try {
+          let query = `SELECT * FROM linked_account WHERE main_account_holder = '${req.data}'`;
+          const result = await queryAsync(query);
+          res.json(result)
+        } catch (error) {
+          console.error('Error executing query:', error);
+          res.status(500).send('Internal Server Error');
+        }
+       });
+
+
+       router.get('/user/profile',verify.userAuthenticationToken, async (req, res) => {
+        console.log(req.query)
+        try {
+          let query = `SELECT * FROM users WHERE unique_id = '${req.data}'`;
+          const result = await queryAsync(query);
+          res.json(result)
+        } catch (error) {
+          console.error('Error executing query:', error);
+          res.status(500).send('Internal Server Error');
+        }
+       });
+
+
+       router.post('/contactus', async (req, res) => {
+
+
+        try {
+            const { unique_id } = req.body;
+      
+      
+            // Insert new record
+            const insertResult = await queryAsync('INSERT INTO contact SET ?', req.body);
+      
+            if (insertResult.affectedRows > 0) {
+                res.json({ msg: 'success' });
+            } else {
+                res.json({ msg: 'error' });
+            }
+        } catch (error) {
+            console.error('Error in customer/add:', error);
+            res.status(500).json({ msg: 'error' });
+        }
+      });
+
 module.exports = router
