@@ -38,12 +38,14 @@ router.get('/user/dashboard', verify.userAuthenticationToken, async (req, res) =
         const getCurrentMonthDates = verify.getCurrentMonthDates();
         const getLastMonthDates = verify.getLastMonthDates();
         const getCurrentYearDates = verify.getCurrentYearDates();
+        const getLastFinancialYearDates = verify.getLastFinancialYearDates()
 
         const weeklyreport = `SELECT COALESCE(SUM(actual_pl), 0) AS weekly_actual_pl FROM short_report WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ?;`;
         const monthlyreport = `SELECT COALESCE(SUM(actual_pl), 0) AS monthly_actual_pl FROM short_report WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ?;`;
         const lastmonthreport = `SELECT COALESCE(SUM(actual_pl), 0) AS last_month_actual_pl FROM short_report WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ?;`;
         const yearlyreport = `SELECT COALESCE(SUM(actual_pl), 0) AS yearly_actual_pl FROM short_report WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ?;`;
-        const lasttrade = `SELECT * FROM short_report WHERE unique_id = ? ORDER BY str_to_date(date, '%d-%m-%Y') DESC LIMIT 1;`;
+        const lastyearlyreport = `SELECT COALESCE(SUM(actual_pl), 0) AS last_yearly_actual_pl FROM short_report WHERE unique_id = ? AND str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ?;`;
+        const lasttrade = `SELECT * FROM short_report WHERE unique_id = ? ORDER BY str_to_date(date, '%d-%m-%Y') DESC LIMIT 5;`;
 
         const queryParams = [
             req.data,
@@ -54,10 +56,12 @@ router.get('/user/dashboard', verify.userAuthenticationToken, async (req, res) =
             getLastMonthDates.startDate, getLastMonthDates.endDate,
             req.data,
             getCurrentYearDates.startDate, getCurrentYearDates.endDate,
+            req.data,
+            getLastFinancialYearDates.startDate, getLastFinancialYearDates.endDate,
             req.data
         ];
 
-        const sqlQuery = weeklyreport + monthlyreport + lastmonthreport + yearlyreport + lasttrade;
+        const sqlQuery = weeklyreport + monthlyreport + lastmonthreport + yearlyreport + lastyearlyreport + lasttrade;
         const result = await queryAsync(sqlQuery, queryParams);
 
 

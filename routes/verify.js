@@ -73,9 +73,9 @@ async function userAuthenticationToken(req, res, next) {
 
 
 
-const readDetailedExcelData = async () => {
+const readDetailedExcelData = async (filename) => {
 
-  const excelFilePath = 'public/read.xlsx';
+  const excelFilePath = `public/images/${filename}`;
   const workbook = xlsx.readFile(excelFilePath);
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
@@ -236,6 +236,30 @@ function formatDate(date) {
   
   }
 
+
+  function getLastFinancialYearDates() {
+    const today = new Date();
+
+    // Check if the current month is April or later
+    // If so, the financial year started from April of the current year
+    // Otherwise, it started from April of the previous year
+    const startYear = today.getMonth() >= 3 ? today.getFullYear() - 1 : today.getFullYear() - 2;
+
+    // The financial year ended on March 31st of the current year
+    const endYear = today.getMonth() >= 3 ? today.getFullYear() - 1 : today.getFullYear() - 1;
+
+    // Set the start date to April 1st of the start year
+    const startDate = new Date(startYear, 3, 1);
+
+    // Set the end date to March 31st of the end year
+    const endDate = new Date(endYear, 2, 31);
+
+    return { startDate: formatDate(startDate), endDate: formatDate(endDate) };
+}
+
+
+// console.log('Last Financial Year',getLastFinancialYearDates())
+
   
 
   module.exports = {
@@ -247,7 +271,8 @@ function formatDate(date) {
     getLastMonthDates,
     getCurrentYearDates,
     userAuthenticationToken,
-    getCurrentDate
+    getCurrentDate,
+    getLastFinancialYearDates
   }
 
 

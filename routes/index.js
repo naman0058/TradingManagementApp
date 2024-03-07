@@ -304,7 +304,9 @@ console.log('run')
 
     // Call the first route logic
 
-    const detailedReportData = await verify.readDetailedExcelData();
+    const detailedReportData = await verify.readDetailedExcelData(req.file.filename);
+
+    console.log('detailedReportData',detailedReportData)
 
     if(detailedReportData.msg == 'Customer Not Exists in Our Database'){
         res.render('add_csv',{msg:'Customer Not Exists in Our Database'})
