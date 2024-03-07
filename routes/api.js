@@ -156,7 +156,7 @@ router.post('/user/report/search', verify.userAuthenticationToken, async (req, r
     router.get('/user/linked/account',verify.userAuthenticationToken, async (req, res) => {
         console.log(req.query)
         try {
-          let query = `SELECT l.* ,(select u.name from users u where u.id = l.second_account_holder) as linked_account FROM linked_account l WHERE main_account_holder = '${req.data}'`;
+          let query = `SELECT l.* ,(select u.name from users u where u.unique_id = l.second_account_holder) as linked_account FROM linked_account l WHERE main_account_holder = '${req.data}'`;
           const result = await queryAsync(query);
           res.json(result)
         } catch (error) {
