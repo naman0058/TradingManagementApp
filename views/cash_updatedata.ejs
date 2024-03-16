@@ -32,11 +32,16 @@
 									
 
                                     <div class="row">
-                                        <div class="col-xl-12">
+                                        <div class="col-xl-6">
                                             <label  class="form-label">Choose Customer</label>
                                             <input type="hidden" value="<%=result[0].id%>" id="id" name="id">
                                             <input type="text" value="<%=result[0].unique_id%>" id="unique_id" name="unique_id" class="form-control" readonly>
                                         </div>
+                                        <div class="col-xl-6">
+                                            <label  class="form-label">Choose Date</label>
+                                            <input type="date" value="<%=result[0].date%>" id="date" name="date" class="form-control">
+                                        </div>
+                                    </div>
 
 <div class="row" style="margin-top: 20px;">
     <div class="col-xl-6">
@@ -106,12 +111,13 @@
         amount : $('#amount').val(),
         unique_id: $('#unique_id').val(),
         id: $('#id').val(),
+        date:$('#date').val()
 
 
 
     };
 
-    if(data.unique_id == '' || data.from_date == '' || data.to_date == '') {
+    if(data.unique_id == '' || data.unique_id == 'null' || data.trade_name == '' || data.amount == '' || data.date == '') {
    alert('Mandatory Field Missing');
 } 
     else{

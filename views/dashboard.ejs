@@ -32,11 +32,8 @@
 										<div class="depostit-card-media d-flex justify-content-between pb-0">
 											<div>
 												<h6>Weekly Commission</h6>
-												<%
-// Calculate the discounted value
-var weekly_actual_pl = result[0][0].weekly_actual_pl * 0.2;
-%>
-												<h3>Rs. <%=weekly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
+												
+												<h3>Rs. <%=result[5][0].weekly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
 											</div>
 											
 										</div>
@@ -50,11 +47,8 @@ var weekly_actual_pl = result[0][0].weekly_actual_pl * 0.2;
 										<div class="depostit-card-media d-flex justify-content-between pb-0">
 											<div>
 												<h6>Monthly Commission</h6>
-												<%
-// Calculate the discounted value
-var monthly_actual_pl = result[1][0].monthly_actual_pl * 0.2;
-%>
-												<h3>Rs.<%=monthly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
+												
+												<h3>Rs.<%=result[6][0].monthly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
 											</div>
 											
 										</div>
@@ -68,11 +62,8 @@ var monthly_actual_pl = result[1][0].monthly_actual_pl * 0.2;
 										<div class="depostit-card-media d-flex justify-content-between pb-0">
 											<div>
 												<h6>Last Month Commission</h6>
-												<%
-// Calculate the discounted value
-var last_month_actual_pl = result[2][0].last_month_actual_pl * 0.2;
-%>
-												<h3>Rs.<%=last_month_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
+											
+												<h3>Rs.<%=result[7][0].last_month_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
 											</div>
 											
 										</div>
@@ -87,11 +78,8 @@ var last_month_actual_pl = result[2][0].last_month_actual_pl * 0.2;
 										<div class="depostit-card-media d-flex justify-content-between pb-0">
 											<div>
 												<h6>Yearly Commission</h6>
-												<%
-												// Calculate the discounted value
-												var yearly_actual_pl = result[3][0].yearly_actual_pl * 0.2;
-												%>
-												<h3>Rs.<%=yearly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
+												
+												<h3>Rs.<%=result[8][0].yearly_actual_pl.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })%></h3>
 											</div>
 											
 										</div>

@@ -85,6 +85,55 @@ pool.query(`select * from admin where email ='${body.email}' and password = '${b
 // })
 
 
+
+// router.get('/dashboard', verify.adminAuthenticationToken, (req, res) => {
+//   var getCurrentWeekDates = verify.getCurrentWeekDates();
+//   var getCurrentMonthDates = verify.getCurrentMonthDates();
+//   var getLastMonthDates = verify.getLastMonthDates();
+//   var getCurrentYearDates = verify.getCurrentYearDates();
+
+//   // Query to calculate the commission for each user for the current week
+  
+//   // Query to get the last 30 trades for a specific user
+//   var lasttrade = `
+//     SELECT
+//       *
+//     FROM
+//       short_report
+//     WHERE
+//       unique_id = '${req.query.unique_id}'
+//     ORDER BY
+//       str_to_date(date, '%d-%m-%Y') DESC
+//     LIMIT
+//       30;
+//   `;
+
+//   // Execute all queries
+//   pool.query(commisionweeklyreport + commisionmonthlyreport + commisionlastmonthreport + commisionyearlyreport + lasttrade, (err, result) => {
+//     if (err) throw err;
+
+//     // Calculate total commission for all users
+//     const totalCommission = {
+//       weekly_actual_pl: 0,
+//       monthly_actual_pl: 0,
+//       last_month_actual_pl: 0,
+//       yearly_actual_pl: 0
+//     };
+
+//     // Sum up the commissions for all users
+//     result[0].forEach(row => totalCommission.weekly_actual_pl += row.weekly_actual_pl);
+//     result[1].forEach(row => totalCommission.monthly_actual_pl += row.monthly_actual_pl);
+//     result[2].forEach(row => totalCommission.last_month_actual_pl += row.last_month_actual_pl);
+//     result[3].forEach(row => totalCommission.yearly_actual_pl += row.yearly_actual_pl);
+
+//     // Remove individual user commission data from the result
+//     result.splice(0, 4);
+
+//     res.json({ totalCommission, trades: result });
+//   });
+// });
+
+
 router.get('/dashboard', verify.adminAuthenticationToken, (req, res) => {
   var getCurrentWeekDates = verify.getCurrentWeekDates();
   var getCurrentMonthDates = verify.getCurrentMonthDates();
@@ -95,7 +144,52 @@ router.get('/dashboard', verify.adminAuthenticationToken, (req, res) => {
   var lastmonthreport = `select COALESCE(sum(actual_pl), 0) as last_month_actual_pl from short_report where str_to_date(date, '%d-%m-%Y') between '${getLastMonthDates.startDate}' and '${getLastMonthDates.endDate}';`;
   var yearlyreport = `select COALESCE(sum(actual_pl), 0) as yearly_actual_pl from short_report where str_to_date(date, '%d-%m-%Y') between '${getCurrentYearDates.startDate}' and '${getCurrentYearDates.endDate}';`;
   var lasttrade = `select * from short_report where unique_id = '${req.query.unique_id}' order by str_to_date(date, '%d-%m-%Y') desc limit 30;`
-  pool.query(weeklyreport + monthlyreport + lastmonthreport + yearlyreport+lasttrade, (err, result) => {
+  
+  var commisionweeklyreport = `
+    SELECT
+      COALESCE(SUM(sr.actual_pl * ( u.percentage / 100)), 0) AS weekly_actual_pl
+    FROM
+      short_report AS sr
+    INNER JOIN
+      users AS u ON sr.unique_id = u.unique_id
+    WHERE
+      str_to_date(sr.date, '%d-%m-%Y') BETWEEN '${getCurrentWeekDates.startDate}' AND '${getCurrentWeekDates.endDate}';
+  `;
+
+  var commisionmonthlyreport = `
+    SELECT
+      COALESCE(SUM(sr.actual_pl * (u.percentage / 100)), 0) AS monthly_actual_pl
+    FROM
+      short_report AS sr
+    INNER JOIN
+      users AS u ON sr.unique_id = u.unique_id
+    WHERE
+      str_to_date(sr.date, '%d-%m-%Y') BETWEEN '${getCurrentMonthDates.startDate}' AND '${getCurrentMonthDates.endDate}';
+  `;
+
+  var commisionlastmonthreport = `
+    SELECT
+      COALESCE(SUM(sr.actual_pl * (u.percentage / 100)), 0) AS last_month_actual_pl
+    FROM
+      short_report AS sr
+    INNER JOIN
+      users AS u ON sr.unique_id = u.unique_id
+    WHERE
+      str_to_date(sr.date, '%d-%m-%Y') BETWEEN '${getLastMonthDates.startDate}' AND '${getLastMonthDates.endDate}';
+  `;
+
+  var commisionyearlyreport = `
+    SELECT
+      COALESCE(SUM(sr.actual_pl * (u.percentage / 100)), 0) AS yearly_actual_pl
+    FROM
+      short_report AS sr
+    INNER JOIN
+      users AS u ON sr.unique_id = u.unique_id
+    WHERE
+      str_to_date(sr.date, '%d-%m-%Y') BETWEEN '${getCurrentYearDates.startDate}' AND '${getCurrentYearDates.endDate}';
+  `;
+
+  pool.query(weeklyreport + monthlyreport + lastmonthreport + yearlyreport+lasttrade + commisionweeklyreport + commisionmonthlyreport + commisionlastmonthreport +commisionyearlyreport, (err, result) => {
       if (err) throw err;
       else res.render(`dashboard`,{result,unique_id:req.query.unique_id})
       // else res.json(result);
@@ -154,7 +248,6 @@ router.post('/cash/add', async (req, res) => {
 
 
   try {
-  req.body['date'] = verify.getCurrentDate()
      console.log(req.body)
       // Insert new record
       const insertResult = await queryAsync('INSERT INTO cash SET ?', req.body);
@@ -417,42 +510,55 @@ ORDER BY
 
 
 router.get('/commission-graph', (req, res) => {
-  var query = `SELECT
-  IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
-FROM
-  (
-    SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-    SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-    SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
-    SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
-  ) AS months
-LEFT JOIN
-  short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
-                      AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
-                          DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
-                          AND DATE_FORMAT(CURDATE(), '%Y-03-31')
-                      AND unique_id = '${req.query.unique_id}'
-GROUP BY
-  months.month
-ORDER BY
-  months.month;`;
-  pool.query(query, (err, result) => {
-      if (err) {
-          throw err;
-      } else {
-          const dataWithCommission = result.map(item => {
-              const totalActualPl = parseFloat(item.total_actual_pl);
-              const commission = totalActualPl * 0.2;
-              return { total_actual_pl: totalActualPl, commission: commission };
-          });
+  let percentage = 0.2;
 
-          const totalActualPl = dataWithCommission.map(item => item.commission.toFixed(2));
-          const reorderedArray = totalActualPl.slice(3).concat(totalActualPl.slice(0, 3));
-          res.json(reorderedArray);
-          // res.json(totalActualPl);
-          // res.json(dataWithCommission);
-      }
-  });
+pool.query(`select percentage from users where unique_id = '${req.query.unique_id}'`,(err,result)=>{
+  if(err) throw err;
+  else{
+    if(result[0]){
+      percentage = result[0].percentage/100;
+    }
+    
+    var query = `SELECT
+    IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+  FROM
+    (
+      SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+      SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+      SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
+      SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
+    ) AS months
+  LEFT JOIN
+    short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
+                        AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
+                            DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
+                            AND DATE_FORMAT(CURDATE(), '%Y-03-31')
+                        AND unique_id = '${req.query.unique_id}'
+  GROUP BY
+    months.month
+  ORDER BY
+    months.month;`;
+    pool.query(query, (err, result) => {
+        if (err) {
+            throw err;
+        } else {
+            const dataWithCommission = result.map(item => {
+                const totalActualPl = parseFloat(item.total_actual_pl);
+                const commission = totalActualPl * percentage;
+                return { total_actual_pl: totalActualPl, commission: commission };
+            });
+  
+            const totalActualPl = dataWithCommission.map(item => item.commission.toFixed(2));
+            const reorderedArray = totalActualPl.slice(3).concat(totalActualPl.slice(0, 3));
+            res.json(reorderedArray);
+            // res.json(totalActualPl);
+            // res.json(dataWithCommission);
+        }
+    });
+  }
+})
+
+ 
 });
 
 
@@ -490,42 +596,109 @@ ORDER BY
 
 
 router.get('/dashboard/commission-graph', (req, res) => {
-  var query = `SELECT
-  IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
-FROM
-  (
-    SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-    SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-    SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
-    SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
-  ) AS months
-LEFT JOIN
-  short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
-                      AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
-                          DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
-                          AND DATE_FORMAT(CURDATE(), '%Y-03-31')
-GROUP BY
-  months.month
-ORDER BY
-  months.month;`;
-  pool.query(query, (err, result) => {
+  pool.query(`SELECT unique_id, AVG(percentage) AS avg_percentage FROM users GROUP BY unique_id`, (err, userResults) => {
       if (err) {
           throw err;
       } else {
-          const dataWithCommission = result.map(item => {
-              const totalActualPl = parseFloat(item.total_actual_pl);
-              const commission = totalActualPl * 0.2;
-              return { total_actual_pl: totalActualPl, commission: commission };
+          const commissions = [];
+          userResults.forEach(userResult => {
+              const userCommissionQuery = `SELECT
+                                              IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+                                          FROM
+                                              (
+                                                  SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+                                                  SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+                                                  SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
+                                                  SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
+                                              ) AS months
+                                          LEFT JOIN
+                                              short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
+                                                                  AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
+                                                                      DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
+                                                                      AND DATE_FORMAT(CURDATE(), '%Y-03-31')
+                                                                  AND unique_id = '${userResult.unique_id}'
+                                          GROUP BY
+                                              months.month
+                                          ORDER BY
+                                              months.month;`;
+              pool.query(userCommissionQuery, (commissionErr, commissionResults) => {
+                  if (commissionErr) {
+                      throw commissionErr;
+                  } else {
+                      const userCommissions = commissionResults.map(item => {
+                          const totalActualPl = parseFloat(item.total_actual_pl);
+                          const commissionPercentage = userResult.avg_percentage / 100;
+                          const commission = totalActualPl * commissionPercentage;
+                          return { total_actual_pl: totalActualPl, commission: commission };
+                      });
+                      commissions.push(userCommissions);
+                      if (commissions.length === userResults.length) {
+                          // Calculate total commissions for each month
+                          const totalCommissions = Array(12).fill(0);
+                          commissions.forEach(userCommission => {
+                              userCommission.forEach((item, index) => {
+                                  totalCommissions[index] += item.commission;
+                              });
+                          });
+                          const totalCommissionsFormatted = totalCommissions.map(commission => commission.toFixed(2));
+                                      const reorderedArray = totalCommissionsFormatted.slice(3).concat(totalCommissionsFormatted.slice(0, 3));
+            res.json(reorderedArray);
+                          // res.json(totalCommissionsFormatted);
+                      }
+                  }
+              });
           });
-
-          const totalActualPl = dataWithCommission.map(item => item.commission.toFixed(2));
-          const reorderedArray = totalActualPl.slice(3).concat(totalActualPl.slice(0, 3));
-          res.json(reorderedArray);
-          // res.json(totalActualPl);
-          // res.json(dataWithCommission);
       }
   });
 });
+
+
+// router.get('/dashboard/commission-graph', (req, res) => {
+
+// pool.query(`select avg(percentage) as avg_percentage from users`,(err,result)=>{
+//   if(err) throw err;
+//   else {
+//     let percentage = result[0].avg_percentage/100;
+//     var query = `SELECT
+//     IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+//   FROM
+//     (
+//       SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+//       SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+//       SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
+//       SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
+//     ) AS months
+//   LEFT JOIN
+//     short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
+//                         AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
+//                             DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
+//                             AND DATE_FORMAT(CURDATE(), '%Y-03-31')
+//   GROUP BY
+//     months.month
+//   ORDER BY
+//     months.month;`;
+//     pool.query(query, (err, result) => {
+//         if (err) {
+//             throw err;
+//         } else {
+//             const dataWithCommission = result.map(item => {
+//                 const totalActualPl = parseFloat(item.total_actual_pl);
+//                 const commission = totalActualPl * 0.35;
+//                 return { total_actual_pl: totalActualPl, commission: commission };
+//             });
+  
+//             const totalActualPl = dataWithCommission.map(item => item.commission.toFixed(2));
+//             const reorderedArray = totalActualPl.slice(3).concat(totalActualPl.slice(0, 3));
+//             res.json(reorderedArray);
+//             // res.json(totalActualPl);
+//             // res.json(dataWithCommission);
+//         }
+//     });
+//   }
+// })
+
+ 
+// });
 
 
 router.get('/customer/trade/details',(req,res)=>{
