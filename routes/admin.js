@@ -60,6 +60,11 @@ router.get('/login', function(req, res) {
 });
 
 
+router.get('/logout',(req,res)=>{
+  req.session.adminid = null;
+  res.redirect('/admin/login');
+})
+
 router.post('/login',(req,res)=>{
   let body = req.body;
   console.log("body",body)
@@ -244,7 +249,7 @@ router.post('/dashboard/customer/add', async (req, res) => {
 
 
 
-router.post('/cash/add', async (req, res) => {
+router.post('/cash/add',verify.adminAuthenticationToken, async (req, res) => {
 
 
   try {
@@ -264,7 +269,8 @@ router.post('/cash/add', async (req, res) => {
 });
 
 
-router.get('/dashboard/customer/list', async (req, res) => {
+router.get('/dashboard/customer/list',verify.adminAuthenticationToken, async (req, res) => {
+  
   try {
     let query = `SELECT * FROM users`;
     const result = await queryAsync(query);
@@ -277,7 +283,7 @@ router.get('/dashboard/customer/list', async (req, res) => {
 
 
 
- router.get('/dashboard/cash/list', async (req, res) => {
+ router.get('/dashboard/cash/list',verify.adminAuthenticationToken, async (req, res) => {
   try {
     let query = `SELECT * FROM cash`;
     const result = await queryAsync(query);
@@ -289,7 +295,7 @@ router.get('/dashboard/customer/list', async (req, res) => {
  });
 
 
- router.get('/dashboard/update/data',(req,res)=>{
+ router.get('/dashboard/update/data',verify.adminAuthenticationToken,(req,res)=>{
   let id = req.query.id;
   pool.query(`select * from users where id = ${id}`,(err,result)=>{
     if(err) throw err;
@@ -300,7 +306,7 @@ router.get('/dashboard/customer/list', async (req, res) => {
 
 
 
-router.get('/dashboard/cash/update/data',(req,res)=>{
+router.get('/dashboard/cash/update/data',verify.adminAuthenticationToken,(req,res)=>{
   let id = req.query.id;
   pool.query(`select * from cash where id = ${id}`,(err,result)=>{
     if(err) throw err;
@@ -311,7 +317,7 @@ router.get('/dashboard/cash/update/data',(req,res)=>{
 
 
 
-router.post('/dashboard/upload/data', (req, res) => {
+router.post('/dashboard/upload/data',verify.adminAuthenticationToken, (req, res) => {
   console.log('req.body', req.body);
   pool.query('UPDATE users SET ? WHERE id = ?', [req.body, req.body.id], (err, result) => {
       if (err) {
@@ -324,7 +330,7 @@ router.post('/dashboard/upload/data', (req, res) => {
 
 
 
-router.post('/cash/upload/data', (req, res) => {
+router.post('/cash/upload/data',verify.adminAuthenticationToken, (req, res) => {
   console.log('req.body', req.body);
   pool.query('UPDATE cash SET ? WHERE id = ?', [req.body, req.body.id], (err, result) => {
       if (err) {
@@ -336,7 +342,7 @@ router.post('/cash/upload/data', (req, res) => {
 });
 
 
-router.get('/dashboard/delete/data',(req,res)=>{
+router.get('/dashboard/delete/data',verify.adminAuthenticationToken,(req,res)=>{
   let id = req.query.id;
   pool.query(`delete from users where id = ${id}`,(err,result)=>{
     if(err) throw err;
@@ -365,7 +371,7 @@ router.get('/dashboard/delete/data',(req,res)=>{
 })
 
 
-router.get('/dashboard/cash/delete/data',(req,res)=>{
+router.get('/dashboard/cash/delete/data',verify.adminAuthenticationToken,(req,res)=>{
   let id = req.query.id;
   pool.query(`delete from cash where id = ${id}`,(err,result)=>{
     if(err) throw err;
@@ -394,7 +400,7 @@ router.get('/dashboard/users/show', async (req, res) => {
 
 
 
- router.post('/dashboard/account/link', async (req, res) => {
+ router.post('/dashboard/account/link',verify.adminAuthenticationToken, async (req, res) => {
 
 
   try {
@@ -423,7 +429,7 @@ router.get('/dashboard/users/show', async (req, res) => {
 
 
 
-router.get('/dashboard/linked/account', async (req, res) => {
+router.get('/dashboard/linked/account',verify.adminAuthenticationToken, async (req, res) => {
   console.log(req.query)
   try {
     let query = `SELECT * FROM linked_account WHERE main_account_holder = '${req.query.unique_id}' OR second_account_holder = '${req.query.unique_id}'`;
@@ -439,7 +445,7 @@ router.get('/dashboard/linked/account', async (req, res) => {
 
 
 
- router.get('/dashboard/link/account/delete/data',(req,res)=>{
+ router.get('/dashboard/link/account/delete/data',verify.adminAuthenticationToken,(req,res)=>{
   let id = req.query.id;
   pool.query(`delete from linked_account where id = ${id}`,(err,result)=>{
     if(err) throw err;
@@ -476,7 +482,7 @@ router.get('/customer/dashboard', verify.adminAuthenticationToken, (req, res) =>
 
 
 
-router.get('/bar-graph', (req, res) => {
+router.get('/bar-graph', verify.adminAuthenticationToken,(req, res) => {
   var query = `SELECT
   IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
 FROM
@@ -509,7 +515,7 @@ ORDER BY
 
 
 
-router.get('/commission-graph', (req, res) => {
+router.get('/commission-graph', verify.adminAuthenticationToken,(req, res) => {
   let percentage = 0.2;
 
 pool.query(`select percentage from users where unique_id = '${req.query.unique_id}'`,(err,result)=>{
@@ -563,7 +569,7 @@ pool.query(`select percentage from users where unique_id = '${req.query.unique_i
 
 
 
-router.get('/dashboard/bar-graph', (req, res) => {
+router.get('/dashboard/bar-graph', verify.adminAuthenticationToken,(req, res) => {
   var query = `SELECT
   IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
 FROM
@@ -595,7 +601,7 @@ ORDER BY
 });
 
 
-router.get('/dashboard/commission-graph', (req, res) => {
+router.get('/dashboard/commission-graph',verify.adminAuthenticationToken, (req, res) => {
   pool.query(`SELECT unique_id, AVG(percentage) AS avg_percentage FROM users GROUP BY unique_id`, (err, userResults) => {
       if (err) {
           throw err;
@@ -701,7 +707,7 @@ router.get('/dashboard/commission-graph', (req, res) => {
 // });
 
 
-router.get('/customer/trade/details',(req,res)=>{
+router.get('/customer/trade/details',verify.adminAuthenticationToken,(req,res)=>{
   var query = `select * from detail_report where date = '${req.query.date}' and unique_id = '${req.query.unique_id}';`
   pool.query(query,(err,result)=>{
     if(err) throw err;
@@ -713,7 +719,7 @@ router.get('/customer/trade/details',(req,res)=>{
 
 
 
-router.post('/report/search',(req,res)=>{
+router.post('/report/search',verify.adminAuthenticationToken,(req,res)=>{
   console.log(req.body)
   var query =`select * from short_report where str_to_date(date, '%d-%m-%Y') between '${req.body.from_date}' and '${req.body.to_date}' and unique_id  = '${req.body.unique_id}' order by date`
   pool.query(query,(err,result)=>{
