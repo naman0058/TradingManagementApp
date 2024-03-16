@@ -114,19 +114,19 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
   
   
   
-router.post('/user/report/search', verify.userAuthenticationToken, async (req, res) => {
-    try {
-        const query = `SELECT * FROM short_report WHERE str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ? AND unique_id = ? ORDER BY date`;
-        const queryParams = [req.body.from_date, req.body.to_date, req.data];
+// router.post('/user/report/search', verify.userAuthenticationToken, async (req, res) => {
+//     try {
+//         const query = `SELECT * FROM short_report WHERE str_to_date(date, '%d-%m-%Y') BETWEEN ? AND ? AND unique_id = ? ORDER BY date`;
+//         const queryParams = [req.body.from_date, req.body.to_date, req.data];
         
-        const result = await queryAsync(query, queryParams);
+//         const result = await queryAsync(query, queryParams);
         
-        res.json(result);
-    } catch (error) {
-        console.error('Error while searching user report:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+//         res.json(result);
+//     } catch (error) {
+//         console.error('Error while searching user report:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// });
 
 
 
@@ -179,25 +179,39 @@ router.post('/user/report/search', verify.userAuthenticationToken, async (req, r
        });
 
 
-       router.post('/contactus', async (req, res) => {
+    //    router.post('/contactus', async (req, res) => {
 
 
-        try {
-            const { unique_id } = req.body;
+    //     try {
+    //         const { unique_id } = req.body;
       
       
-            // Insert new record
-            const insertResult = await queryAsync('INSERT INTO contact SET ?', req.body);
+    //         // Insert new record
+    //         const insertResult = await queryAsync('INSERT INTO contact SET ?', req.body);
       
-            if (insertResult.affectedRows > 0) {
-                res.json({ msg: 'success' });
-            } else {
-                res.json({ msg: 'error' });
+    //         if (insertResult.affectedRows > 0) {
+    //             res.json({ msg: 'success' });
+    //         } else {
+    //             res.json({ msg: 'error' });
+    //         }
+    //     } catch (error) {
+    //         console.error('Error in customer/add:', error);
+    //         res.status(500).json({ msg: 'error' });
+    //     }
+    //   });
+
+
+
+
+
+      router.get('/change-password',verify.userAuthenticationToken, (req, res) => {
+        console.log('req.body', req.body);
+        pool.query('UPDATE users SET ? WHERE id = ?', [req.query, req.data], (err, result) => {
+            if (err) {
+                console.error('Error updating data:', err);
+                return res.status(500).json({ msg: 'error' });
             }
-        } catch (error) {
-            console.error('Error in customer/add:', error);
-            res.status(500).json({ msg: 'error' });
-        }
+            res.json({ msg: 'success' });
+        });
       });
-
 module.exports = router

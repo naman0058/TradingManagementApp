@@ -3,7 +3,54 @@ var router = express.Router();
 var pool = require('./pool');
 const util = require('util');
 const queryAsync = util.promisify(pool.query).bind(pool);
-var verify = require('./verify')
+var verify = require('./verify');
+const e = require('express');
+
+
+router.get('/label-name',(req,res)=>{
+  const { startDate, endDate, monthNames } = getCurrentYearDates();
+// console.log("Financial Year Start Date:", startDate);
+// console.log("Financial Year End Date:", endDate);
+// console.log("Month Names with Prospective Year:", monthNames);
+res.json(monthNames)
+})
+
+
+function getCurrentYearDates() {
+  const today = new Date();
+  // Check if the current month is April or later
+  // If so, the financial year starts from April of the current year
+  // Otherwise, it starts from April of the previous year
+  const startYear = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+  // The financial year ends on March 31st of the following year
+  const endYear = today.getMonth() >= 3 ? today.getFullYear() + 1 : today.getFullYear();
+  // Set the start date to April 1st of the start year
+  const startDate = new Date(startYear, 3, 1);
+  // Set the end date to March 31st of the end year
+  const endDate = new Date(endYear, 2, 31);
+
+  // Generate an array of month names and years from the start date to the end date
+  const monthNames = [];
+  let currentDate = new Date(startDate); // Start from the startDate
+  while (currentDate <= endDate) {
+      const monthName = currentDate.toLocaleDateString('en-us', { month: 'short', year: 'numeric' });
+      monthNames.push(monthName);
+      currentDate.setMonth(currentDate.getMonth() + 1); // Move to the next month
+  }
+
+  return { startDate: formatDate(startDate), endDate: formatDate(endDate), monthNames };
+}
+
+function formatDate(date) {
+  const options = { year: 'numeric', month: 'short', day: '2-digit' };
+  return date.toLocaleDateString('en-US', options);
+}
+
+
+
+
+
+
 
 /* GET users listing. */
 
@@ -200,7 +247,26 @@ router.get('/dashboard/delete/data',(req,res)=>{
   let id = req.query.id;
   pool.query(`delete from users where id = ${id}`,(err,result)=>{
     if(err) throw err;
+    // else res.redirect('/admin/dashboard/customer/list')
+    else{
+        pool.query(`delete from short_report where unique_id = '${id}'`,(err,result)=>{
+    if(err) throw err;
+    else {
+      pool.query(`delete from detail_report where unique_id = '${id}'`,(err,result)=>{
+        if(err) throw err;
+        // else res.json({msg:'success'})
+        else{
+          pool.query(`delete from cash where id = ${id}`,(err,result)=>{
+            if(err) throw err;
+            // else res.redirect('/admin/dashboard/cash/list')
     else res.redirect('/admin/dashboard/customer/list')
+
+          })
+        }
+      })
+    }
+  })
+    }
   })
   
 })
@@ -322,10 +388,10 @@ router.get('/bar-graph', (req, res) => {
   IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
 FROM
   (
-      SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
-      SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-      SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-      SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+    SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+    SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+    SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
+    SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
   ) AS months
 LEFT JOIN
   short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
@@ -342,7 +408,8 @@ ORDER BY
           throw err;
       } else {
           const totalActualPl = result.map(item => item.total_actual_pl);
-          res.json(totalActualPl);
+          const reorderedArray = totalActualPl.slice(3).concat(totalActualPl.slice(0, 3));
+          res.json(reorderedArray);
       }
   });
 });
@@ -354,10 +421,10 @@ router.get('/commission-graph', (req, res) => {
   IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
 FROM
   (
-      SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
-      SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-      SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-      SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+    SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+    SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+    SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
+    SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
   ) AS months
 LEFT JOIN
   short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
@@ -380,7 +447,9 @@ ORDER BY
           });
 
           const totalActualPl = dataWithCommission.map(item => item.commission.toFixed(2));
-          res.json(totalActualPl);
+          const reorderedArray = totalActualPl.slice(3).concat(totalActualPl.slice(0, 3));
+          res.json(reorderedArray);
+          // res.json(totalActualPl);
           // res.json(dataWithCommission);
       }
   });
@@ -393,10 +462,10 @@ router.get('/dashboard/bar-graph', (req, res) => {
   IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
 FROM
   (
-      SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
-      SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-      SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-      SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+    SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+    SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+    SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
+    SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
   ) AS months
 LEFT JOIN
   short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
@@ -412,7 +481,9 @@ ORDER BY
           throw err;
       } else {
           const totalActualPl = result.map(item => item.total_actual_pl);
-          res.json(totalActualPl);
+          const reorderedArray = totalActualPl.slice(3).concat(totalActualPl.slice(0, 3));
+          res.json(reorderedArray);
+          // res.json(totalActualPl);
       }
   });
 });
@@ -423,10 +494,10 @@ router.get('/dashboard/commission-graph', (req, res) => {
   IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
 FROM
   (
-      SELECT '01' AS month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL
-      SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
-      SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
-      SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12'
+    SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+    SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+    SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
+    SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
   ) AS months
 LEFT JOIN
   short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
@@ -447,8 +518,10 @@ ORDER BY
               return { total_actual_pl: totalActualPl, commission: commission };
           });
 
-          const totalActualPl = dataWithCommission.map(item => item.commission);
-          res.json(totalActualPl);
+          const totalActualPl = dataWithCommission.map(item => item.commission.toFixed(2));
+          const reorderedArray = totalActualPl.slice(3).concat(totalActualPl.slice(0, 3));
+          res.json(reorderedArray);
+          // res.json(totalActualPl);
           // res.json(dataWithCommission);
       }
   });
@@ -475,5 +548,19 @@ router.post('/report/search',(req,res)=>{
     else res.json(result)
   })
 })
+
+
+
+// router.get('/old-delete-data',(req,res)=>{
+//   pool.query(`delete from short_report where unique_id = '${req.query.unique_id}'`,(err,result)=>{
+//     if(err) throw err;
+//     else {
+//       pool.query(`delete from detail_report where unique_id = '${req.query.unique_id}'`,(err,result)=>{
+//         if(err) throw err;
+//         else res.json({msg:'success'})
+//       })
+//     }
+//   })
+// })
 
 module.exports = router;

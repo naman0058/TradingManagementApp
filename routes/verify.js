@@ -25,19 +25,19 @@ const queryAsync = util.promisify(pool.query).bind(pool);
 //   }
 
 
-function userAuthenticationToken(req, res, next) {
-  const token = req.headers['authorization'];
-  if (!token) {
-      return res.status(401).json({ message: 'Token not provided' });
-  }
-  jwt.verify(token, secretkey, (err, data) => {
-      if (err) {
-          return res.status(401).json({ message: 'Invalid Token Received' });
-      }
-      req.user = data;
-      next();
-  });
-}
+// function userAuthenticationToken(req, res, next) {
+//   const token = req.headers['authorization'];
+//   if (!token) {
+//       return res.status(401).json({ message: 'Token not provided' });
+//   }
+//   jwt.verify(token, secretkey, (err, data) => {
+//       if (err) {
+//           return res.status(401).json({ message: 'Invalid Token Received' });
+//       }
+//       req.user = data;
+//       next();
+//   });
+// }
 
 
 
@@ -258,12 +258,11 @@ function formatDate(date) {
 }
 
 
-// console.log('Last Financial Year',getLastFinancialYearDates())
+// console.log('Last Financial Year',getCurrentYearDates())
 
   
 
   module.exports = {
-    userAuthenticationToken,
     adminAuthenticationToken,
     readDetailedExcelData,
     getCurrentWeekDates,

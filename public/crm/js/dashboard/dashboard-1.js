@@ -363,12 +363,17 @@
 	}
 
 let commissionData = []
+let labelsdata = []
 
 let unique_id = $('#unique_id').val()
 
 
 $.getJSON(`/admin/commission-graph?unique_id=${unique_id}`,data=>{
 	commissionData = data
+})
+
+$.getJSON(`/admin/label-name`,data=>{
+	labelsdata = data
 })
 
 
@@ -382,7 +387,7 @@ $.getJSON(`/admin/bar-graph?unique_id=${unique_id}`,data=>{
           type: 'column',
           data: bargraphdata
         }, {
-          name: 'Revenue',
+          name: 'Our Commission',
           type: 'area',
           data: commissionData
         }, ],
@@ -469,9 +474,7 @@ $.getJSON(`/admin/bar-graph?unique_id=${unique_id}`,data=>{
           }
         },
 		colors:["var(--primary)","#3AC977","#FF5E5E"],
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
-          'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-        ],
+        labels: labelsdata,
         markers: {
           size: 0
         },
@@ -571,11 +574,11 @@ $.getJSON(`/admin/bar-graph?unique_id=${unique_id}`,data=>{
 			bargraphdata = data
 				 var options = {
 				  series: [{
-				  name: 'Revenue',
+				  name: 'Our Commission',
 				  type: 'column',
 				  data: bargraphdata	
 				}, {
-				  name: 'Revenue',
+				  name: 'Our Commission',
 				  type: 'area',
 				  data: bargraphdata
 				}, ],
@@ -662,9 +665,7 @@ $.getJSON(`/admin/bar-graph?unique_id=${unique_id}`,data=>{
 				  }
 				},
 				colors:["var(--primary)","#3AC977","#FF5E5E"],
-				labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
-				  'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-				],
+				labels: labelsdata,
 				markers: {
 				  size: 0
 				},
