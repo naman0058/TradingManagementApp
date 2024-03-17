@@ -245,7 +245,7 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
             }
     
             // Update password
-            await queryAsync(`UPDATE users SET password = '${password}' WHERE id = '${unique_id}'`);
+            await queryAsync(`UPDATE users SET password = '${password}' WHERE unique_id = '${unique_id}'`);
             
             res.json({ msg: 'Password updated successfully' });
         } catch (error) {
