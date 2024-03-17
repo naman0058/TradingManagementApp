@@ -261,4 +261,58 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
         }
     });
     
+
+
+    router.get('/bar-graph', verify.userAuthenticationToken, (req, res) => {
+        var query = `SELECT
+            IFNULL(SUM(CAST(actual_pl AS DECIMAL)), 0) AS total_actual_pl
+        FROM
+            (
+                SELECT '04' AS month UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL
+                SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL
+                SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12' UNION ALL
+                SELECT '01' UNION ALL SELECT '02' UNION ALL SELECT '03'
+            ) AS months
+        LEFT JOIN
+            short_report AS sr ON SUBSTRING(sr.date, 4, 2) = months.month
+                                AND STR_TO_DATE(sr.date, '%d-%m-%Y') BETWEEN
+                                    DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL -1 YEAR), '%Y-04-01')
+                                    AND DATE_FORMAT(CURDATE(), '%Y-03-31')
+                                AND unique_id = '${req.data}'
+        GROUP BY
+            months.month
+        ORDER BY
+            months.month;`;
+    
+        // Define an array of colors corresponding to each month
+        const colors = ['#0093D8', '#85C4EF', '#FF5733', '#FFC300', '#C70039', '#900C3F',
+                        '#581845', '#DAF7A6', '#FFC300', '#FF5733', '#85C4EF', '#0093D8'];
+    
+        pool.query(query, (err, result) => {
+            if (err) {
+                throw err;
+            } else {
+                const totalActualPl = result.map(item => item.total_actual_pl);
+                const reorderedArray = totalActualPl.slice(3).concat(totalActualPl.slice(0, 3));
+    
+                // Transform reorderedArray into the desired format
+                const output = reorderedArray.map((value, index) => ({
+                    x: index + 1,
+                    y: parseInt(value),
+                    color: colors[index],
+                    label: getMonthLabel(index) // Get month label using a helper function
+                }));
+    
+                res.json(output);
+            }
+        });
+    });
+    
+    // Helper function to get month label
+    function getMonthLabel(index) {
+        const months = ['APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC','JAN', 'FEB', 'MAR'];
+        return months[index];
+    }
+    
+
 module.exports = router
