@@ -15,7 +15,7 @@ router.post('/user/login', async (req, res) => {
 
     try {
         // Use parameterized queries to prevent SQL injection
-        const query = 'SELECT id FROM users WHERE number = ? AND password = ?';
+        const query = 'SELECT * FROM users WHERE number = ? AND password = ?';
         const result = await queryAsync(query, [number, password]);
 
         if (result.length > 0) {
