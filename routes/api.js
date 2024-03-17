@@ -204,14 +204,54 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
 
 
 
-      router.get('/change-password',verify.userAuthenticationToken, (req, res) => {
-        console.log('req.body', req.body);
-        pool.query('UPDATE users SET ? WHERE id = ?', [req.query, req.data], (err, result) => {
-            if (err) {
-                console.error('Error updating data:', err);
-                return res.status(500).json({ msg: 'error' });
+    //   router.post('/change-password', (req, res) => {
+    //     console.log('req.body', req.body);
+    //     pool.query(`select * from users where unique_id = '${req.body.unique_id}'`,(err,result)=>{
+    //         if(err) throw err;
+    //         else {
+    //             if(result[0].password == req.body.old_password){
+    //                 pool.query(`UPDATE users SET password = '${req.body.password}' WHERE id = '${req.body.unique_id}'`,(err, result) => {
+    //                     if (err) {
+    //                         console.error('Error updating data:', err);
+    //                         return res.status(500).json({ msg: 'error' });
+    //                     }
+    //                     res.json({ msg: 'success' });
+    //                 });
+    //             }
+    //             else{
+    //                 res.json({msg:'Invalid Credentials'})
+    //             }
+    //         }
+    //     })
+  
+    //   });
+
+    router.post('/change-password', async (req, res) => {
+        try {
+            const { unique_id, old_password, password } = req.body;
+    
+            // Validate inputs
+            if (!unique_id || !old_password || !password) {
+                return res.status(400).json({ msg: 'Missing required fields' });
             }
-            res.json({ msg: 'success' });
-        });
-      });
+    
+            // Check if old password matches
+            const user = await pool.query(`SELECT * FROM users WHERE unique_id = '${unique_id}'`);
+            if (!user[0]) {
+                return res.status(404).json({ msg: 'User not found' });
+            }
+            if (user[0].password !== old_password) {
+                return res.status(401).json({ msg: 'Invalid old password' });
+            }
+    
+            // Update password
+            await pool.query(`UPDATE users SET password = '${password}' WHERE id = '${unique_id}'`);
+            
+            res.json({ msg: 'Password updated successfully' });
+        } catch (error) {
+            console.error('Error updating password:', error);
+            res.status(500).json({ msg: 'Internal server error' });
+        }
+    });
+    
 module.exports = router
