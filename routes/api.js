@@ -236,7 +236,7 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
             }
     
             // Check if old password matches
-            const user = await pool.query(`SELECT * FROM users WHERE unique_id = '${unique_id}'`);
+            const user = await queryAsync(`SELECT * FROM users WHERE unique_id = '${unique_id}'`);
             if (!user[0]) {
                 return res.status(404).json({ msg: 'User not found' });
             }
@@ -245,7 +245,7 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
             }
     
             // Update password
-            await pool.query(`UPDATE users SET password = '${password}' WHERE id = '${unique_id}'`);
+            await queryAsync(`UPDATE users SET password = '${password}' WHERE id = '${unique_id}'`);
             
             res.json({ msg: 'Password updated successfully' });
         } catch (error) {
