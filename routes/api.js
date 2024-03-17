@@ -285,8 +285,8 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
             months.month;`;
     
         // Define an array of colors corresponding to each month
-        const colors = ['#0093D8', '#85C4EF', '#FF5733', '#FFC300', '#C70039', '#900C3F',
-                        '#581845', '#DAF7A6', '#FFC300', '#FF5733', '#85C4EF', '#0093D8'];
+        const colors = ['#0093D8', '#6CAEDF', '#084B77', '#F4F8FD', '#F45B69', '#FFA372',
+                        '#95D5B2', '#FFCE32', '#D3E0F5', '#B71C1C', '#FAD02E', '#6D214F'];
     
         pool.query(query, (err, result) => {
             if (err) {
@@ -310,7 +310,7 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
     
     // Helper function to get month label
     function getMonthLabel(index) {
-        const months = ['APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC','JAN', 'FEB', 'MAR'];
+        const months = ['APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC','JAN','FEB','MAR'];
         return months[index];
     }
     
