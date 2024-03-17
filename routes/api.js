@@ -285,8 +285,8 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
             months.month;`;
     
         // Define an array of colors corresponding to each month
-        const colors = ['#0093D8', '#6CAEDF', '#084B77', '#F4F8FD', '#F45B69', '#FFA372',
-                        '#95D5B2', '#FFCE32', '#D3E0F5', '#B71C1C', '#FAD02E', '#6D214F'];
+        const colors = ['#0093D8', '#6CAEDF', '#084B77', '#FF5733', '#F45B69', '#FFA372',
+                        '#95D5B2', '#FFCE32', '#D3E0F5', '#B71C1C', '#FAD02E', '#DAF7A6'];
     
         pool.query(query, (err, result) => {
             if (err) {
