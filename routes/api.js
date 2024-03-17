@@ -19,7 +19,7 @@ router.post('/user/login', async (req, res) => {
         const result = await queryAsync(query, [number, password]);
 
         if (result.length > 0) {
-            pool.query(`update users set token = '${req.body.token}' where number = '${number}'`,(err,data)=>{
+            pool.query(`update users set token = '${req.body.token}' where unique_id = '${result[0].unique_id}'`,(err,data)=>{
                 if(err) throw err;
                 else{
                     res.json(result);
