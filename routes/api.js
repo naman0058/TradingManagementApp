@@ -19,7 +19,14 @@ router.post('/user/login', async (req, res) => {
         const result = await queryAsync(query, [number, password]);
 
         if (result.length > 0) {
-            res.json(result);
+            pool.query(`update users set token = '${req.body.token}' where number = '${number}'`,(err,data)=>{
+                if(err) throw err;
+                else{
+                    res.json(result);
+
+                }
+
+            })
         } else {
             res.json({ msg: 'Invalid credentials' });
         }
