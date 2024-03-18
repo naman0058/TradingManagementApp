@@ -220,6 +220,11 @@ router.get('/dashboard/report',verify.adminAuthenticationToken,(req,res)=>{
 })
 
 
+router.get('/dashboard/payout/report',verify.adminAuthenticationToken,(req,res)=>{
+  res.render(`payout_report`,{msg:''})
+})
+
+
 router.post('/dashboard/customer/add', async (req, res) => {
 
 
@@ -472,8 +477,8 @@ router.get('/customer/dashboard', verify.adminAuthenticationToken, (req, res) =>
   var yearlyreport = `select COALESCE(sum(actual_pl), 0) as yearly_actual_pl from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getCurrentYearDates.startDate}' and '${getCurrentYearDates.endDate}';`;
   var lasttrade = `select * from short_report where unique_id = '${req.query.unique_id}' and str_to_date(date, '%d-%m-%Y') between '${getCurrentYearDates.startDate}' and '${getCurrentYearDates.endDate}' order by str_to_date(date, '%d-%m-%Y') desc;`
   var cashtrade = `select * from cash where unique_id = '${req.query.unique_id}' and date between '${getCurrentYearDates.startDate}' and '${getCurrentYearDates.endDate}' order by date desc;`
- 
-  pool.query(weeklyreport + monthlyreport + lastmonthreport + yearlyreport+lasttrade+cashtrade, (err, result) => {
+  var userdetails = `select * from users where unique_id = '${req.query.unique_id}';`
+  pool.query(weeklyreport + monthlyreport + lastmonthreport + yearlyreport+lasttrade+cashtrade+userdetails, (err, result) => {
       if (err) throw err;
       else res.render(`customerdashboard`,{result,unique_id:req.query.unique_id})
       // else res.json(result);
@@ -727,6 +732,56 @@ router.post('/report/search',verify.adminAuthenticationToken,(req,res)=>{
     else res.json(result)
   })
 })
+
+
+
+// router.post('/payout/report/search',verify.adminAuthenticationToken,(req,res)=>{
+//   console.log(req.body)
+//   var query =`select sum(s.actual_pl) , 
+//   (select u.name from users u where u.unique_id = s.unique_id) as username,
+//   (select u.percentage from users u where u.unique_id = s.unique_id) as userpercentage
+//   from short_report s where str_to_date(s.date, '%d-%m-%Y') between '${req.body.from_date}' and '${req.body.to_date}';`
+//   pool.query(query,(err,result)=>{
+//     if(err) throw err;
+//     else res.json(result)
+//   })
+// })
+
+
+router.post('/payout/report/search', verify.adminAuthenticationToken, (req, res) => {
+  console.log(req.body);
+
+  // Using placeholders for prepared statements
+  var query = `
+      SELECT 
+          s.unique_id,
+          SUM(s.actual_pl) AS total_pl,
+          u.name AS username,
+          u.percentage AS userpercentage
+      FROM 
+          short_report s
+      JOIN 
+          users u ON s.unique_id = u.unique_id
+      WHERE 
+          STR_TO_DATE(s.date, '%d-%m-%Y') BETWEEN ? AND ?
+      GROUP BY 
+          s.unique_id, u.name, u.percentage
+  `;
+
+  // Values for prepared statement
+  var values = [
+      req.body.from_date,
+      req.body.to_date
+  ];
+
+  pool.query(query, values, (err, result) => {
+      if (err) {
+          throw err; // Handle error appropriately, maybe log it
+      } else {
+          res.json(result);
+      }
+  });
+});
 
 
 
