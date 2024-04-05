@@ -11,14 +11,6 @@ const pool = mysql.createPool({
     multipleStatements: true,
 
 
-  // host : 'localhost',
-  //  user: 'root',
-  // password:'123',
-  //   database: 'fileachiever',
-  //   port:'3306' ,
-  //   multipleStatements: true
-
-  // CREATE USER 'root'@'%' IDENTIFIED BY 'MyComplexPassword123!';
 
   })
 

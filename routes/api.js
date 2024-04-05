@@ -315,4 +315,279 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
     }
     
 
+
+    function decodeEncodedTextFindLength(encodedText) {
+        const parts = encodedText.split('').filter(part => part.trim() !== ''); // Split the text based on the separator and remove empty parts
+        console.log('parts', parts.length);
+        return parts.length; // Return the length of parts
+    }
+    
+    // parts.length = 28 then decodeEncodedText() run perfect
+    // Decoding function in Node.js
+    function decodeEncodedText(encodedText) {
+        const parts = encodedText.split('').filter(part => part.trim() !== ''); // Split the text based on the separator and remove empty parts
+
+        if(parts.length == '5'){
+        console.log('parts',parts)
+
+            // parts[11] = parts[11].replace('b', '').replace('\x1E', '')
+            // parts[10] = parts[10].replace('a', '')
+            
+            // merged_data = parts[10] + ' ' + parts[11]
+
+
+            // const authors = parts[5].replace('c', '').replace('\x1E', '');
+            // const unknow19 = parts[19].replace('a', '').replace('\x1E', '');
+
+            // console.log('see',authors)
+        
+            // let finalContent = null;
+        
+            // if (authors.trim() !== '') {
+            //     console.log('authors has value:', authors);
+            //     finalContent = authors;
+            // } else {
+            //     console.log('authors is empty');
+
+            //     finalContent = unknow19;
+            // }
+        
+
+                    const metadata = {
+                       
+                        Title: parts[1].replace('a', '').replace('\x1E', '') || "",
+                        Editor: parts[2].replace('b', '').replace('\x1E', '') || "",
+                        Location: parts[3].replace('a', '').replace('\x1E', '') || "",
+                         Publisher: parts[4].replace('b', '').replace('\x1E', '') || "",
+                        //  Year: parts[5].replace('c', '').replace('\x1E', '') || "",
+
+                        // Title: parts[3].replace('a', '').replace('\x1E', '') || "",
+                        // Editor: parts[4].replace('b', '').replace('\x1E', '') || "",
+                        // Authors: finalContent,
+                        // Location: parts[6].replace('a', '').replace('\x1E', '') || "",
+                        // Publisher: parts[7].replace('b', '').replace('\x1E', '') || "",
+                        // Year: parts[8].replace('c', '').replace('\x1E', '') || "",
+                        // Description: parts[9].replace('a', '').replace('\x1E', '') || "",
+                        // Call: merged_data,
+            
+                        // Subjects: parts[12].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow13: parts[13].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow14: parts[14].replace('a', '').replace('\x1E', '') || "",
+                        // Notes: parts[15].replace('a', '').replace('\x1E', '') || "",
+                        // Price: parts[16].replace('a', '').replace('\x1E', '') || "",
+                        // Content: parts[17].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow18: parts[18].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow19: parts[19].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow20: parts[20].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow21: parts[21].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow22: parts[22].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow23: parts[23].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow24: parts[24].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow25: parts[25].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow26: parts[26].replace('a', '').replace('\x1E', '') || "",
+                        // Unknow27: parts[27].replace('g', '').replace('\x1E', '') || "",
+                       
+                        // Unknow32: parts[32].replace('a', '').replace('\x1E', '') || "",
+            
+            
+                    };
+            
+                    pool.query(`INSERT INTO formatting_data SET ?`, metadata, (err, result) => {
+                        if (err) {
+                            console.error('Error inserting data:', err);
+                        } else {
+                            // console.log('Data inserted successfully');
+                        }
+                    });
+            
+        }
+        else{
+        // console.log('Length Exceed')
+        }
+
+
+        
+        // return metadata;
+    }
+    
+    // const encodedText = "01905     2 00229   4501000002000398008004100340010000500000020000500005082002000172100000700333245010800010250000500198260003800118300001600156490000500323500002500298505009000208650000600192700000500328904000500203964001700381  a  a1 aDictionary of the anonymous & pseudonymous literature of Great BritainbcHalkett, Samuel & Laing, John  aEdinburghbWilliam Patersonc1888  a4 v., 25cm.  aRRb014.2 H173l  a   a1 a  aIncluding the works of foreigners written in, or translated into the English language  aPrice not available.  a  a  ad                                          abcdefgBS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @||@|";
+    // const decodedMetadata = decodeEncodedText(encodedText);
+    // console.log(decodedMetadata);
+    
+    
+  
+    router.get('/fine-length', async (req, res) => {
+        try {
+            const result = await queryAsync(`SELECT LS_AREA_7 FROM MARC_NDX_TBL`);
+            for (let i = 0; i < result.length; i++) {
+                const encodedText = result[i].LS_AREA_7;
+                const decodedMetadata = decodeEncodedText(encodedText);
+                // console.log('done')
+            }
+
+            res.json({ msg:'done' }); // Send the count as JSON response
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            res.status(500).send("Internal Server Error");
+        }
+    });
+    
+
+
+    async function insertFormattedData(data) {
+        try {
+            await queryAsync(`INSERT INTO formatting_data SET ?`, data);
+            console.log('Data inserted successfully');
+        } catch (error) {
+            console.error("Error inserting data:", error);
+            throw error; // Propagate error to the caller
+        }
+    }
+
+
+    // const result = await queryAsync(`SELECT LS_AREA_7 FROM MARC_NDX_TBL LIMIT 1000 OFFSET 1000`);
+
+    
+
+
+
+    router.get('/fine-count', async (req, res) => {
+        try {
+            const result = await queryAsync(`SELECT LS_AREA_7 FROM MARC_NDX_TBL`);
+            
+            // Initialize an object to store count for each length
+            const lengthCount = {};
+            let totalCount = 0; // Variable to store the total count of lengths encountered
+    
+            for (let i = 0; i < result.length; i++) {
+                const encodedText = result[i].LS_AREA_7;
+                const decodedMetadata = decodeEncodedTextFindLength1(encodedText);
+    
+                // Increment count for the corresponding length
+                if (lengthCount[decodedMetadata]) {
+                    lengthCount[decodedMetadata]++;
+                } else {
+                    lengthCount[decodedMetadata] = 1;
+                }
+    
+                totalCount++; // Increment the total count
+            }
+    
+            // Send the length count and total count as JSON response
+            res.json({ lengthCount, totalCount });
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            res.status(500).send("Internal Server Error");
+        }
+    });
+    
+    
+    function decodeEncodedTextFindLength1(encodedText) {
+        const parts = encodedText.split('').filter(part => part.trim() !== ''); // Split the text based on the separator and remove empty parts
+        return parts.length; // Return the length of parts
+    }
+
+
+
+
+    router.get('/fine-count1', async (req, res) => {
+        try {
+            const result = await queryAsync(`SELECT LS_AREA_7 FROM MARC_NDX_TBL LIMIT 100 OFFSET 43900`);
+            
+            // Initialize an object to store count for each length
+            const lengthCount = {};
+            let totalCount = 0; // Variable to store the total count of lengths encountered
+        
+            for (let i = 0; i < result.length; i++) {
+                const encodedText = result[i].LS_AREA_7;
+                const decodedMetadata = decodeEncodedTextFindLength3(encodedText);
+        
+                // Increment count for the corresponding length
+                if (lengthCount[decodedMetadata]) {
+                    lengthCount[decodedMetadata]++;
+                } else {
+                    lengthCount[decodedMetadata] = 1;
+                }
+        
+                totalCount++; // Increment the total count
+            }
+    
+            // Loop through lengthCount object and create tables dynamically
+            for (const length in lengthCount) {
+                if (Object.hasOwnProperty.call(lengthCount, length)) {
+                    // Check if length is greater than 195, if so, skip creating table and inserting data
+                    if (parseInt(length) > 195) {
+                        continue; // Skip to next iteration
+                    }
+                    
+                    const tableName = `partslength${length}`;
+                    const columns = Array.from({ length: parseInt(length) }, (_, index) => `r${index + 1}`);
+                    const createTableQuery = `CREATE TABLE IF NOT EXISTS ${tableName} (id SERIAL PRIMARY KEY, ${columns.map(column => `${column} TEXT`).join(', ')})`;
+                    
+                    // Create table
+                    await queryAsync(createTableQuery);
+    
+                    // Insert data into table
+                    // Assuming result is an array of objects with LS_AREA_7 property
+                    const values = result
+                        .filter(item => decodeEncodedTextFindLength3(item.LS_AREA_7) === parseInt(length))
+                        .map(item => {
+                            const parts = item.LS_AREA_7.split('').filter(part => part.trim() !== '');
+                            return parts.map((part, index) => `'${sanitizeString(part)}'`).join(', ');
+                            // return parts.map((part, index) => `'${part}'`).join(', ');
+                        });
+    
+                    if (values.length > 0) {
+                        const insertQuery = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${values.join('), (')})`;
+                        await queryAsync(insertQuery);
+                    }
+                }
+            }
+        
+            // Send the length count and total count as JSON response
+            res.json({ lengthCount, totalCount });
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            res.status(500).send("Internal Server Error");
+        }
+    });
+
+    
+    
+    
+
+    function decodeEncodedTextFindLength3(encodedText) {
+        const parts = encodedText.split('').filter(part => part.trim() !== ''); // Split the text based on the separator and remove empty parts
+        return parts.length; // Return the length of parts
+    }
+    
+
+
+    // const sanitizeString = (str) => {
+    //     // Escape single quotes in the string
+    //     return str.replace(/'/g, "''");
+    // };
+
+    const sanitizeString = (str) => {
+        // Replace all occurrences of '\x1E' with an empty string, escape single quotes, and remove first letter if it's a lowercase letter from 'a' to 'z'
+        let sanitizedStr = str.replace(/'/g, "''").replace(/\x1E/g, '').replace(/\x1D/g, '');
+    
+        // Remove the first letter if it is within the range of 'a' to 'z'
+        if (/^[a-z]/i.test(sanitizedStr)) {
+            sanitizedStr = sanitizedStr.substring(1);
+        }
+    
+        // Remove invalid characters or sequences from the string
+        // sanitizedStr = sanitizedStr.replace(/[^ -~]/g, '');
+
+        // Replace array brackets with string representations
+    sanitizedStr = sanitizedStr.replace(/\[([^\]]+)\]/g, '');
+    
+        return sanitizedStr;
+    };
+    
+    
+    
+    
+
 module.exports = router
